@@ -1,6 +1,7 @@
 #ifndef _6502_H
 #define _6502_H
 
+#include <iostream>
 #include <cstdint>
 #include "types.h"
 #include "Memory.h"
@@ -14,7 +15,7 @@ private:
     word_t PC;      // Program counter
     uint8_t P;      // Processor flags
     
-    Memory *mem;
+    Memory& mem;
     
     uint8_t counter;    // remaining cycles for opcode
     uint8_t opcode;
@@ -33,7 +34,11 @@ public:
 
     M6502(Memory *mem);
 
+    void reset();
     void step();
+    bool inline checkFlag(Flags f) const;
+    
+    friend std::ostream& operator <<(std::ostream& os, const M6502& cpu);
 };
 
 #endif

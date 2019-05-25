@@ -17,3 +17,9 @@ Memory::~Memory() {
 uint8_t& Memory::operator [](const std::size_t i) {
     return *(this->mem[i]);
 }
+
+void Memory::add(const std::size_t index, const std::size_t range, uint8_t **locations) {
+    for (int i = 0; i < range; i++) {
+        this->mem[index + i] = locations[i];
+    }
+}
