@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
     Memory *mem = new Memory(0x10000);
-	M6502 *cpu = new M6502(mem);
+    M6502 *cpu = new M6502(mem);
     
     cpu->reset();
     
