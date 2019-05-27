@@ -1,24 +1,28 @@
 #include <iostream>
-#include "M6502.h"
-#include "Memory.h"
+#include <fstream>
+#include <cstddef>
+#include <cstdint>
+#include "CBM1541.h"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
-    Memory *mem = new Memory(0x10000);
-    M6502 *cpu = new M6502(mem);
+    ifstream firmwareFile;
+    firmwareFile.open("firmware/dos1541");
     
-    cpu->reset();
+    firmwareFile.seekg(0, firmwareFile.end);
+    std::size_t firmwareSize = firmwareFile.tellg();
+    firmwareFile.seekg(0, firmwareFile.beg);
     
-    cout << *cpu << endl;
+    cout << firmwareSize << endl;
     
-    /*for (int i = 0; i < 0x10000; i++) {
-        (*mem)[i] = i;
-        cout << (int)(*mem)[i] << endl;
-    }*/
+    uint8_t *firmware = new uint8_t[firmwareSize];
+    firmwareFile.read((char *)firmware, firmwareSize);
     
-    delete cpu;
-    delete mem;
+    CBM1541 *drive = new CBM1541();
+    
+    delete[] firmware;
+    delete drive;
 	return 0;
 }

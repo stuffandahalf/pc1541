@@ -1,12 +1,12 @@
-#ifndef _6502_H
-#define _6502_H
+#ifndef MOS6502_H
+#define MOS6502_H
 
 #include <iostream>
 #include <cstdint>
 #include "types.h"
 #include "Memory.h"
 
-class M6502 {
+class MOS6502 {
 private:
     uint8_t A;      // Accumulator
     uint8_t X;      // X index
@@ -21,7 +21,7 @@ private:
     uint8_t opcode;
     
 public:
-    enum Flags {
+    enum class Flags : uint8_t {
         CARRY = 1,
         ZERO = 2,
         IRQ = 4,
@@ -32,13 +32,13 @@ public:
         NEGATIVE = 128,
     };
 
-    M6502(Memory *mem);
+    MOS6502(Memory *mem);
 
     void reset();
     void step();
     bool inline checkFlag(Flags f) const;
     
-    friend std::ostream& operator <<(std::ostream& os, const M6502& cpu);
+    friend std::ostream& operator <<(std::ostream& os, const MOS6502& cpu);
 };
 
 #endif
