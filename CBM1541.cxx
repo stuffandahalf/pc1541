@@ -1,15 +1,17 @@
 #include "CBM1541.h"
 
 CBM1541::CBM1541(std::string romPath) {
-    this->mem = new Memory(0x10000);
-    this->rom = new ROM("firmware/dos1541");
-    this->cpu = new MOS6502(this->mem);
+    this->addrSpace = new AddressSpace(0x10000);
+    this->rom = new ROM(romPath);
+    this->ram = new RAM(0x0800);
+    this->cpu = new MOS6502(this->addrSpace);
     this->serialVia = new MOS6522();
     this->motorHeadVia = new MOS6522();
     
-    
-    this->mem->map(0xC000, this->rom->getSize(), this->rom->getRom());
-    
+    this->addrSpace->map(0x0000, *this->ram);
+    //this->addrSpace->map(0x1800, this->serialVia->getRegisters());
+    //this->addrSpace->map(0x1C00, this->motorHeadVia->getRegisters());
+    this->addrSpace->map(0xC000, *this->rom);
     
     this->cpu->reset();
     
@@ -21,7 +23,7 @@ CBM1541::~CBM1541() {
     delete this->serialVia;
     delete this->cpu;
     delete this->rom;
-    delete this->mem;
+    delete this->addrSpace;
 }
 
 void CBM1541::execute() {

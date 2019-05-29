@@ -15,7 +15,7 @@ private:
     word_t PC;      // Program counter
     uint8_t P;      // Processor flags
     
-    Memory& mem;
+    AddressSpace& addrSpace;
     
     uint8_t counter;    // remaining cycles for opcode
     uint8_t opcode;
@@ -32,7 +32,7 @@ public:
         NEGATIVE = 128,
     };
 
-    MOS6502(Memory *mem);
+    MOS6502(AddressSpace *addrSpace);
 
     void reset();
     void step();

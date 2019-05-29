@@ -1,6 +1,6 @@
 #include "MOS6502.h"
 
-MOS6502::MOS6502(Memory *mem) : mem(*mem) {
+MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     this->A = 0;
     this->X = 0;
     this->Y = 0;
@@ -14,8 +14,8 @@ MOS6502::MOS6502(Memory *mem) : mem(*mem) {
 
 void MOS6502::reset() {
     uint16_t start = 0;
-    start |= this->mem.r8(this->PC.W++);
-    start |= this->mem.r8(this->PC.W) << 8;
+    start |= this->addrSpace.r8(this->PC.W++);
+    start |= this->addrSpace.r8(this->PC.W) << 8;
     this->PC.W = start;
     
     this->P |= (uint8_t)Flags::IRQ;
@@ -24,7 +24,7 @@ void MOS6502::reset() {
 void MOS6502::step() {
     if (this->counter == 0) {
         //opcode
-        this->opcode = this->mem.r8(PC.W++);
+        this->opcode = this->addrSpace.r8(PC.W++);
         /*switch (this->opcode) {
         case 0x00
         }*/

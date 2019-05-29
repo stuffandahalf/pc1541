@@ -5,7 +5,9 @@
 #include <cstdint>
 #include <cstddef>
 
-class Memory {
+class IMemory;
+
+class AddressSpace {
 public:
     class Byte {
     private:
@@ -29,31 +31,52 @@ public:
     };
     
 private:
-    Memory::Byte **mem;
+    AddressSpace::Byte **mem;
     std::size_t size;
 
 public:
-    Memory(std::size_t size);
-    ~Memory();
+    AddressSpace(std::size_t size);
+    ~AddressSpace();
     
-    void map(const std::size_t index, const std::size_t size, Memory::Byte **locations);
+    void map(const std::size_t index, const std::size_t size, AddressSpace::Byte **locations);
+    void map(const std::size_t index, IMemory& mem);
     
     inline uint8_t r8(const std::size_t addr) { return this->mem[addr]->read(); }
     inline void w8(const std::size_t addr, uint8_t b) { this->mem[addr]->write(b); }
 };
 
-class ROM {
+class IMemory {
+public:
+    virtual std::size_t getSize() = 0;
+    virtual AddressSpace::Byte **getBytes() = 0;
+};
+
+class ROM : public IMemory {
 private:
     std::size_t size;
     uint8_t *rawBuffer;
-    Memory::Byte **buffer;
+    AddressSpace::Byte **buffer;
 
 public:
     ROM(std::string firmwarePath);
     ~ROM();
     
-    std::size_t getSize();
-    Memory::Byte **getRom();
+    virtual std::size_t getSize();
+    virtual AddressSpace::Byte **getBytes();
+};
+
+class RAM : public IMemory {
+private:
+    std::size_t size;
+    uint8_t *rawBuffer;
+    AddressSpace::Byte **buffer;
+    
+public:
+    RAM(std::size_t size);
+    ~RAM();
+    
+    virtual std::size_t getSize();
+    virtual AddressSpace::Byte **getBytes();
 };
 
 #endif

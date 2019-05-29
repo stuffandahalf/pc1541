@@ -8,13 +8,12 @@
 
 class CBM1541 {
 private:
-    Memory *mem;
+    AddressSpace *addrSpace;
     MOS6502 *cpu;
     MOS6522 *serialVia;
     MOS6522 *motorHeadVia;
     ROM *rom;
-    //uint8_t *ram;
-    //uint8_t *rom;
+    RAM *ram;
     
 public:
     CBM1541(std::string romPath);
