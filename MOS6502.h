@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cstdint>
+#include "cpuemu.h"
 #include "types.h"
 #include "Memory.h"
 

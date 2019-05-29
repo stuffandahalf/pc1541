@@ -1,5 +1,7 @@
 #include "MOS6502.h"
 
+extern static Instruction instructions[16][16];
+
 MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     this->A = 0;
     this->X = 0;
@@ -24,10 +26,14 @@ void MOS6502::reset() {
 void MOS6502::step() {
     if (this->counter == 0) {
         this->opcode = this->addrSpace.r8(PC.W++);
+        Instruction *i = &(instructions[this->opcode >> 4][this->opcode & 0xF]);
+        this->counter = i->cycles;
     }
     else {
         switch (opcode) {
+        case 0x00:  // BRK
             
+            break;
         }
     }
     
@@ -61,162 +67,152 @@ std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
     return os;
 }
 
-enum class CycleMod : uint8_t {
-    NONE,
-    MOD1,
-    MOD2
-};
+typedef Instruction i_t;
 
-static struct {
-    char mnemonic[6];
-    uint8_t opcode;
-    uint8_t bytes;
-    uint8_t cycles;
-    CycleMod cycleMod;
-} instructions[16][16] = {
+static Instruction instructions[16][16] = {
     { // 0x0*
-        { "BRK", 0x00, 1, 7, CycleMod::NONE },
-        { "ORA", 0x01, 2, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "ORA", 0x05, 2, 3, CycleMod::NONE },
-        { "ASL", 0x06, 2, 5, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "PHP", 0x08, 1, 3, CycleMod::NONE },
-        { "ORA", 0x09, 2, 2, CycleMod::NONE },
-        { "ASL", 0x0A, 1, 2, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "ORA", 0x0D, 3, 4, CycleMod::NONE },
-        { "ASL", 0x0E, 3, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE }
+        { "BRK", 0x00, 1, 7,  i_t::CycleMod::NONE },
+        { "ORA", 0x01, 2, 6,  i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "ORA", 0x05, 2, 3, i_t::CycleMod::NONE },
+        { "ASL", 0x06, 2, 5, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "PHP", 0x08, 1, 3, i_t::CycleMod::NONE },
+        { "ORA", 0x09, 2, 2, i_t::CycleMod::NONE },
+        { "ASL", 0x0A, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "ORA", 0x0D, 3, 4, i_t::CycleMod::NONE },
+        { "ASL", 0x0E, 3, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE }
     },
     { // 0x1*
-        { "BPL", 0x10, 2, 2, CycleMod::MOD2 },
-        { "ORA", 0x11, 2, 5, CycleMod::MOD1 },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "ORA", 0x15, 2, 4, CycleMod::NONE },
-        { "ASL", 0x16, 2, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "CLC", 0x18, 1, 2, CycleMod::NONE },
-        { "ORA", 0x19, 3, 4, CycleMod::MOD1 },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "ORA", 0x1D, 3, 4, CycleMod::MOD1 },
-        { "ASL", 0x1E, 3, 7, CycleMod:: NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE }
+        { "BPL", 0x10, 2, 2, i_t::CycleMod::MOD2 },
+        { "ORA", 0x11, 2, 5, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "ORA", 0x15, 2, 4, i_t::CycleMod::NONE },
+        { "ASL", 0x16, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "CLC", 0x18, 1, 2, i_t::CycleMod::NONE },
+        { "ORA", 0x19, 3, 4, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "ORA", 0x1D, 3, 4, i_t::CycleMod::MOD1 },
+        { "ASL", 0x1E, 3, 7, i_t::CycleMod:: NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE }
     },
     { // 0x2*
-        { "JSR", 0x20, 3, 6, CycleMod::NONE },
-        { "AND", 0x21, 2, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "BIT", 0x24, 2, 3, CycleMod::NONE },
-        { "AND", 0x25, 2, 3, CycleMod::NONE },
-        { "ROL", 0x26, 2, 5, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "PLP", 0x28, 1, 4, CycleMod::NONE },
-        { "AND", 0x29, 2, 2, CycleMod::NONE },
-        { "ROL", 0x2A, 1, 2, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "BIT", 0x2C, 3, 4, CycleMod::NONE },
-        { "AND", 0x2D, 3, 4, CycleMod::NONE },
-        { "ROL", 0x2E, 3, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE }
+        { "JSR", 0x20, 3, 6, i_t::CycleMod::NONE },
+        { "AND", 0x21, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "BIT", 0x24, 2, 3, i_t::CycleMod::NONE },
+        { "AND", 0x25, 2, 3, i_t::CycleMod::NONE },
+        { "ROL", 0x26, 2, 5, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "PLP", 0x28, 1, 4, i_t::CycleMod::NONE },
+        { "AND", 0x29, 2, 2, i_t::CycleMod::NONE },
+        { "ROL", 0x2A, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "BIT", 0x2C, 3, 4, i_t::CycleMod::NONE },
+        { "AND", 0x2D, 3, 4, i_t::CycleMod::NONE },
+        { "ROL", 0x2E, 3, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE }
     },
     { // 0x3*
-        { "BMI", 0x30, 2, 2, CycleMod::MOD2 },
-        { "AND", 0x31, 2, 5, CycleMod::MOD1 },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "AND", 0x35, 2, 4, CycleMod::NONE },
-        { "ROL", 0x36, 2, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "SEC", 0x38, 1, 2, CycleMod::NONE },
-        { "AND", 0x39, 3, 4, CycleMod::MOD1 },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "AND", 0x3D, 3, 4, CycleMod::MOD1 },
-        { "ROL", 0x3E, 3, 7, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE }
+        { "BMI", 0x30, 2, 2, i_t::CycleMod::MOD2 },
+        { "AND", 0x31, 2, 5, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "AND", 0x35, 2, 4, i_t::CycleMod::NONE },
+        { "ROL", 0x36, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "SEC", 0x38, 1, 2, i_t::CycleMod::NONE },
+        { "AND", 0x39, 3, 4, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "AND", 0x3D, 3, 4, i_t::CycleMod::MOD1 },
+        { "ROL", 0x3E, 3, 7, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE }
     },
     { // 0x4*
-        { "RTI", 0x40, 1, 6, CycleMod::NONE },
-        { "EOR", 0x41, 2, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "EOR", 0x45, 2, 3, CycleMod::NONE },
-        { "LSR", 0x46, 2, 5, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "PHA", 0x48, 1, 3, CycleMod::NONE },
-        { "EOR", 0x49, 2, 2, CycleMod::NONE },
-        { "LSR", 0x4A, 1, 2, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "JMP", 0x4C, 3, 3, CycleMod::NONE },
-        { "EOR", 0x4D, 3, 4, CycleMod::NONE },
-        { "LSR", 0x4E, 3, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE }
+        { "RTI", 0x40, 1, 6, i_t::CycleMod::NONE },
+        { "EOR", 0x41, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "EOR", 0x45, 2, 3, i_t::CycleMod::NONE },
+        { "LSR", 0x46, 2, 5, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "PHA", 0x48, 1, 3, i_t::CycleMod::NONE },
+        { "EOR", 0x49, 2, 2, i_t::CycleMod::NONE },
+        { "LSR", 0x4A, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "JMP", 0x4C, 3, 3, i_t::CycleMod::NONE },
+        { "EOR", 0x4D, 3, 4, i_t::CycleMod::NONE },
+        { "LSR", 0x4E, 3, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE }
     },
     { // 0x5*
-        { "BVC", 0x50, 2, 2, CycleMod::MOD2 },
-        { "EPR", 0x51, 2, 5, CycleMod::MOD1 },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "EOR", 0x55, 2, 4, CycleMod::NONE },
-        { "LSR", 0x56, 2, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "CLI", 0x58, 1, 2, CycleMod::NONE },
-        { "EOR", 0x59, 3, 4, CycleMod::MOD1 },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "EOR", 0x5D, 3, 4, CycleMod::MOD1 },
-        { "LSR", 0x5E, 3, 7, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
+        { "BVC", 0x50, 2, 2, i_t::CycleMod::MOD2 },
+        { "EPR", 0x51, 2, 5, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "EOR", 0x55, 2, 4, i_t::CycleMod::NONE },
+        { "LSR", 0x56, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "CLI", 0x58, 1, 2, i_t::CycleMod::NONE },
+        { "EOR", 0x59, 3, 4, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "EOR", 0x5D, 3, 4, i_t::CycleMod::MOD1 },
+        { "LSR", 0x5E, 3, 7, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
     },
     { // 0x6*
-        { "RTS", 0x60, 1, 6, CycleMod::NONE },
-        { "ADC", 0x61, 2, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "ADC", 0x65, 2, 3, CycleMod::NONE },
-        { "ROR", 0x66, 2, 5, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "PLA", 0x68, 1, 4, CycleMod::NONE }.
-        { "ADC", 0x69, 2, 2, CycleMod::NONE },
-        { "ROR", 0x6A, 1, 2, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "JMP", 0x6C, 3, 5, CycleMod::NONE },
-        { "ADC", 0x6D, 3, 4, CycleMod::NONE },
-        { "ROR", 0x6E, 3, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE }
+        { "RTS", 0x60, 1, 6, i_t::CycleMod::NONE },
+        { "ADC", 0x61, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "ADC", 0x65, 2, 3, i_t::CycleMod::NONE },
+        { "ROR", 0x66, 2, 5, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "PLA", 0x68, 1, 4, i_t::CycleMod::NONE },
+        { "ADC", 0x69, 2, 2, i_t::CycleMod::NONE },
+        { "ROR", 0x6A, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "JMP", 0x6C, 3, 5, i_t::CycleMod::NONE },
+        { "ADC", 0x6D, 3, 4, i_t::CycleMod::NONE },
+        { "ROR", 0x6E, 3, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE }
     },
     { // 0x7*
-        { "BVS", 0x70, 2, 2, CycleMod::MOD2 },
-        { "ADC", 0x71, 2, 5, CycleMod::MOD1 },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "ADC", 0x75, 2, 4, CycleMod::NONE },
-        { "ROR", 0x76, 2, 6, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "SEI", 0x78, 1, 2, CycleMod::NONE },
-        { "ADC", 0x79, 3, 4, CycleMod::MOD1 },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE },
-        { "ADC", 0x7D, 3, 4, CycleMod::MOD1 },
-        { "ROR", 0x7E, 3, 7, CycleMod::NONE },
-        { "INVAL", 0, 0, 0, CycleMod::NONE }
+        { "BVS", 0x70, 2, 2, i_t::CycleMod::MOD2 },
+        { "ADC", 0x71, 2, 5, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "ADC", 0x75, 2, 4, i_t::CycleMod::NONE },
+        { "ROR", 0x76, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "SEI", 0x78, 1, 2, i_t::CycleMod::NONE },
+        { "ADC", 0x79, 3, 4, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
+        { "ADC", 0x7D, 3, 4, i_t::CycleMod::MOD1 },
+        { "ROR", 0x7E, 3, 7, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE }
     },
     { // 0x8*
         
