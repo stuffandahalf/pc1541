@@ -1,4 +1,5 @@
 #include "Memory.h"
+#include <fstream>
 
 Memory::Memory(std::size_t size) {
     this->size = size;
@@ -54,3 +55,36 @@ inline void Memory::Byte::write(uint8_t b) {
         *this->writePtr = b;
     }
 }*/
+
+ROM::ROM(std::string firmwarePath) {
+    std::ifstream firmwareFile(firmwarePath);
+    
+    firmwareFile.seekg(0, firmwareFile.end);
+    this->size = firmwareFile.tellg();
+    firmwareFile.seekg(0, firmwareFile.beg);
+    
+    this->rawBuffer = new uint8_t[this->size];
+    firmwareFile.read((char *)this->rawBuffer, this->size);
+    firmwareFile.close();
+    
+    this->buffer = new Memory::Byte *[this->size];
+    for (int i = 0; i < this->size; i++) {
+        this->buffer[i] = new Memory::Byte(&(this->rawBuffer[i]), nullptr);
+    }
+}
+
+ROM::~ROM() {
+    for (int i = 0; i < this->size; i++) {
+        delete this->buffer[i];
+    }
+    delete[] this->buffer;
+    delete[] this->rawBuffer;
+}
+
+std::size_t ROM::getSize() {
+    return this->size;
+}
+
+Memory::Byte **ROM::getRom() {
+    return this->buffer;
+}

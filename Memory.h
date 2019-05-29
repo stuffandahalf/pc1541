@@ -1,6 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include <string>
 #include <cstdint>
 #include <cstddef>
 
@@ -39,6 +40,20 @@ public:
     
     inline uint8_t r8(const std::size_t addr) { return this->mem[addr]->read(); }
     inline void w8(const std::size_t addr, uint8_t b) { this->mem[addr]->write(b); }
+};
+
+class ROM {
+private:
+    std::size_t size;
+    uint8_t *rawBuffer;
+    Memory::Byte **buffer;
+
+public:
+    ROM(std::string firmwarePath);
+    ~ROM();
+    
+    std::size_t getSize();
+    Memory::Byte **getRom();
 };
 
 #endif
