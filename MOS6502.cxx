@@ -1,74 +1,6 @@
 #include "MOS6502.h"
 
-extern static Instruction instructions[16][16];
-
-MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
-    this->A = 0;
-    this->X = 0;
-    this->Y = 0;
-    this->SP = 0;
-    this->PC.W = 0xFFFC;    // Reset vector
-    this->P = 32;           // All flags 0 except for unused flag
-    
-    this->counter = 0;
-    this->opcode = 0;
-}
-
-void MOS6502::reset() {
-    uint16_t start = 0;
-    start |= this->addrSpace.r8(this->PC.W++);
-    start |= this->addrSpace.r8(this->PC.W) << 8;
-    this->PC.W = start;
-    
-    this->P |= (uint8_t)Flags::IRQ;
-}
-
-void MOS6502::step() {
-    if (this->counter == 0) {
-        this->opcode = this->addrSpace.r8(PC.W++);
-        Instruction *i = &(instructions[this->opcode >> 4][this->opcode & 0xF]);
-        this->counter = i->cycles;
-    }
-    else {
-        switch (opcode) {
-        case 0x00:  // BRK
-            
-            break;
-        }
-    }
-    
-    this->counter--;
-}
-
-bool inline MOS6502::checkFlag(Flags f) const {
-    return this->P & (uint8_t)f;
-}
-
-std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
-    os << "A:\t" << (int)cpu.A << std::endl
-       << "X:\t" << (int)cpu.X << std::endl
-       << "Y:\t" << (int)cpu.Y << std::endl
-       << "SP:\t" << (int)cpu.SP << std::endl
-       << "PC:\t" << (int)cpu.PC.W << std::endl
-       << "Flags" << std::endl
-       /*<< "N: " << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << " "
-       << "V: " << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "
-       << "B: " << cpu.checkFlag(MOS6502::Flags::BREAK) << " "
-       << "D: " << cpu.checkFlag(MOS6502::Flags::DECIMAL) << " "
-       << "I: " << cpu.checkFlag(MOS6502::Flags::IRQ) << " "
-       << "Z: " << cpu.checkFlag(MOS6502::Flags::ZERO) << " "
-       << "C: " << cpu.checkFlag(MOS6502::Flags::CARRY) << " "*/
-       << "NV BDIZC" << std::endl
-       << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "
-       << cpu.checkFlag(MOS6502::Flags::BREAK) << cpu.checkFlag(MOS6502::Flags::DECIMAL) << cpu.checkFlag(MOS6502::Flags::IRQ)
-       << cpu.checkFlag(MOS6502::Flags::ZERO) << cpu.checkFlag(MOS6502::Flags::CARRY)
-       << std::endl;
-       
-    return os;
-}
-
 typedef Instruction i_t;
-
 static Instruction instructions[16][16] = {
     { // 0x0*
         { "BRK", 0x00, 1, 7,  i_t::CycleMod::NONE },
@@ -239,3 +171,70 @@ static Instruction instructions[16][16] = {
         
     }
 };
+
+
+MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
+    this->A = 0;
+    this->X = 0;
+    this->Y = 0;
+    this->SP = 0;
+    this->PC.W = 0xFFFC;    // Reset vector
+    this->P = 32;           // All flags 0 except for unused flag
+    
+    this->counter = 0;
+    this->opcode = 0;
+}
+
+void MOS6502::reset() {
+    uint16_t start = 0;
+    start |= this->addrSpace.r8(this->PC.W++);
+    start |= this->addrSpace.r8(this->PC.W) << 8;
+    this->PC.W = start;
+    
+    this->P |= (uint8_t)Flags::IRQ;
+}
+
+void MOS6502::step() {
+    if (this->counter == 0) {
+        this->opcode = this->addrSpace.r8(PC.W++);
+        Instruction *i = &(instructions[this->opcode >> 4][this->opcode & 0xF]);
+        this->counter = i->cycles;
+        std::cout << i->mnemonic << std::endl;
+    }
+    else {
+        switch (opcode) {
+        case 0x00:  // BRK
+            
+            break;
+        }
+    }
+    
+    this->counter--;
+}
+
+bool inline MOS6502::checkFlag(Flags f) const {
+    return this->P & (uint8_t)f;
+}
+
+std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
+    os << "A:\t" << (int)cpu.A << std::endl
+       << "X:\t" << (int)cpu.X << std::endl
+       << "Y:\t" << (int)cpu.Y << std::endl
+       << "SP:\t" << (int)cpu.SP << std::endl
+       << "PC:\t" << (int)cpu.PC.W << std::endl
+       << "Flags" << std::endl
+       /*<< "N: " << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << " "
+       << "V: " << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "
+       << "B: " << cpu.checkFlag(MOS6502::Flags::BREAK) << " "
+       << "D: " << cpu.checkFlag(MOS6502::Flags::DECIMAL) << " "
+       << "I: " << cpu.checkFlag(MOS6502::Flags::IRQ) << " "
+       << "Z: " << cpu.checkFlag(MOS6502::Flags::ZERO) << " "
+       << "C: " << cpu.checkFlag(MOS6502::Flags::CARRY) << " "*/
+       << "NV BDIZC" << std::endl
+       << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "
+       << cpu.checkFlag(MOS6502::Flags::BREAK) << cpu.checkFlag(MOS6502::Flags::DECIMAL) << cpu.checkFlag(MOS6502::Flags::IRQ)
+       << cpu.checkFlag(MOS6502::Flags::ZERO) << cpu.checkFlag(MOS6502::Flags::CARRY)
+       << std::endl;
+       
+    return os;
+}
