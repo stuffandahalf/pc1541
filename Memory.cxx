@@ -35,6 +35,8 @@ AddressSpace::Byte::Byte(uint8_t *readPtr, uint8_t *writePtr) {
     this->writePtr = writePtr;
 }
 
+
+
 ROM::ROM(std::string firmwarePath) {
     std::ifstream firmwareFile(firmwarePath);
     
