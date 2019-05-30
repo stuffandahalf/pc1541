@@ -9,6 +9,7 @@
 
 class MOS6502 {
 private:
+    uint8_t IR;     // Instruction register (current opcode)
     uint8_t A;      // Accumulator
     uint8_t X;      // X index
     uint8_t Y;      // Y index
@@ -22,6 +23,13 @@ private:
     uint8_t opcode;
     
 public:
+    enum class Vectors : uint16_t {
+        NMI = 0xFFFA,
+        RESET = 0xFFFC,
+        IRQ = 0xFFFE,
+        BRK = 0xFFFE
+    };
+
     enum class Flags : uint8_t {
         CARRY = 1,
         ZERO = 2,
@@ -30,14 +38,14 @@ public:
         BREAK = 16,
         // 1
         OVERFLOW = 64,
-        NEGATIVE = 128,
+        NEGATIVE = 128
     };
 
     MOS6502(AddressSpace *addrSpace);
 
     void reset();
     void step();
-    bool inline checkFlag(Flags f) const;
+    inline bool checkFlag(Flags f) const;
     
     friend std::ostream& operator <<(std::ostream& os, const MOS6502& cpu);
 };

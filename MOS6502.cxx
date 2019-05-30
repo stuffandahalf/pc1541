@@ -1,4 +1,5 @@
 #include "MOS6502.h"
+#include <cstdio>
 
 typedef Instruction i_t;
 static Instruction instructions[16][16] = {
@@ -174,6 +175,7 @@ static Instruction instructions[16][16] = {
 
 
 MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
+    this->IR = 0;
     this->A = 0;
     this->X = 0;
     this->Y = 0;
@@ -189,22 +191,107 @@ void MOS6502::reset() {
     uint16_t start = 0;
     start |= this->addrSpace.r8(this->PC.W++);
     start |= this->addrSpace.r8(this->PC.W) << 8;
+    printf("%X\n", start);
     this->PC.W = start;
     
     this->P |= (uint8_t)Flags::IRQ;
 }
 
 void MOS6502::step() {
+    static uint8_t tmp[3] = { 0 };  // temporary data used between cycles
+    
     if (this->counter == 0) {
-        this->opcode = this->addrSpace.r8(PC.W++);
+        this->IR = this->addrSpace.r8(PC.W++);
         Instruction *i = &(instructions[this->opcode >> 4][this->opcode & 0xF]);
         this->counter = i->cycles;
         std::cout << i->mnemonic << std::endl;
     }
     else {
-        switch (opcode) {
+        switch (this->IR) {
         case 0x00:  // BRK
-            
+            switch (this->counter) {
+            case 6:
+                this->addrSpace.w8(0x100 | this->SP--, this->PC.B.h);
+                break;
+            case 5:
+                this->addrSpace.w8(0x100 | this->SP--, this->PC.B.l);
+                break;
+            case 4:
+                this->P |= (uint8_t)Flags::BREAK;
+                this->P |= (uint8_t)Flags::IRQ;
+                this->addrSpace.w8(0x100 | this->SP--, this->P);
+                break;
+            case 3:
+                tmp[0] = this->addrSpace.r8((uint16_t)Vectors::BRK);      // target addr low
+                break;
+            case 2:
+                tmp[1] = this->addrSpace.r8((uint16_t)Vectors::BRK + 1);  // target addr high
+                break;
+            case 1:
+                this->PC.B.l = tmp[0];
+                this->PC.B.h = tmp[1];
+            }
+            break;
+        case 0x01:  // ORA, indexed, indirect, X
+            switch (this->counter) {
+            case 5:
+                tmp[0] = this->addrSpace.r8(PC.W++) + this->X;
+                break;
+            case 4:
+                tmp[1] = this->addrSpace.r8(tmp[0]);        // effective address low
+                break;
+            case 3:
+                tmp[2] = this->addrSpace.r8(tmp[0] + 1);    // effective address high
+                break;
+            case 2:
+                this->A |= this->addrSpace.r8((tmp[2] << 8) + tmp[1]);
+                break;
+            case 1:
+                if (this->A != 0) this->P &= ~(uint8_t)Flags::ZERO;
+                else this->P |= (uint8_t)Flags::ZERO;
+                
+                if (this->A & 0x80) this->P |= (uint8_t)Flags::NEGATIVE;
+                else this->P &= ~(uint8_t)Flags::NEGATIVE;
+                break;
+            }
+            break;
+        case 0x05:  // ORA, zero page
+            switch (this->counter) {
+            case 2:
+                this->A |= this->addrSpace.r8(this->addrSpace.r8(this->PC.W++));
+                break;
+            case 1:
+                if (this->A != 0) this->P &= ~(uint8_t)Flags::ZERO;
+                else this->P |= (uint8_t)Flags::ZERO;
+                
+                if (this->A & 0x80) this->P |= (uint8_t)Flags::NEGATIVE;
+                else this->P &= ~(uint8_t)Flags::NEGATIVE;
+                break;
+            }
+            break;
+        case 0x06:  // ASL, zero page
+            switch (this->counter) {
+            case 4:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);  // zero page address
+                break;
+            case 3:
+                tmp[1] = this->addrSpace.r8(tmp[0]);    // original value
+                tmp[2] = tmp[1] << 1;                   // updated value
+                break;
+            case 2:
+                this->addrSpace.w8(tmp[0], tmp[2]);
+                break;
+            case 1:
+                if (tmp[2] != 0) this->P &= ~(uint8_t)Flags::ZERO;
+                else this->P |= (uint8_t)Flags::ZERO;
+                
+                if (tmp[2] & 0x80) this->P |= (uint8_t)Flags::NEGATIVE;
+                else this->P &= ~(uint8_t)Flags::NEGATIVE;
+                
+                if (tmp[1] & 0x80) this->P |= (uint8_t)Flags::CARRY;
+                else this->P &= ~(uint8_t)Flags::CARRY;
+                break;
+            }
             break;
         }
     }
@@ -212,7 +299,7 @@ void MOS6502::step() {
     this->counter--;
 }
 
-bool inline MOS6502::checkFlag(Flags f) const {
+inline bool MOS6502::checkFlag(Flags f) const {
     return this->P & (uint8_t)f;
 }
 
