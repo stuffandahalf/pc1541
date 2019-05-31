@@ -32,3 +32,4 @@
 *.app
 
 pc1541
+.DS_Store
