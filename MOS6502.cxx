@@ -184,7 +184,6 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     this->P = 32;           // All flags 0 except for unused flag
     
     this->counter = 0;
-    this->opcode = 0;
 }
 
 void MOS6502::reset() {
@@ -202,7 +201,9 @@ void MOS6502::step() {
     
     if (this->counter == 0) {
         this->IR = this->addrSpace.r8(PC.W++);
-        Instruction *i = &(instructions[this->opcode >> 4][this->opcode & 0xF]);
+        printf("Current opcode: %X\n", this->IR);
+        printf("%X\t%X\n", this->IR >> 4, this->IR & 0xF);
+        Instruction *i = &(instructions[this->IR >> 4][this->IR & 0x0F]);
         this->counter = i->cycles;
         std::cout << i->mnemonic << std::endl;
     }
@@ -293,6 +294,136 @@ void MOS6502::step() {
                 break;
             }
             break;
+        case 0x08:  // PHP
+            switch (this->counter) {
+            case 2:
+                this->addrSpace.w8(0x100 | this->SP, this->P); 
+                break;
+            case 1:
+                this->SP--;
+                break;
+            }
+            break;
+        case 0x09:  // ORA, immediate
+            switch (this->counter) {
+            case 1:
+                this->A |= this->addrSpace.r8(this->PC.W++);
+                
+                if (this->A != 0) this->P &= ~(uint8_t)Flags::ZERO;
+                else this->P |= (uint8_t)Flags::ZERO;
+                
+                if (this->A & 0x80) this->P |= (uint8_t)Flags::NEGATIVE;
+                else this->P &= ~(uint8_t)Flags::NEGATIVE;
+                break;
+            }
+            break;
+        case 0x0A:  // ASL, accum
+            switch (this->counter) {
+            case 1:
+                if (this->A & 0x80) this->P |= (uint8_t)Flags::CARRY;
+                else this->P &= ~(uint8_t)Flags::CARRY;
+                
+                this->A <<= 1;
+                
+                if (!this->A) this->P |= (uint8_t)Flags::ZERO;
+                else this->P &= ~(uint8_t)Flags::ZERO;
+                
+                if (this->A & 0x80) this->P |= (uint8_t)Flags::NEGATIVE;
+                else this->P &= ~(uint8_t)Flags::NEGATIVE;
+                break;
+            }
+            break;
+        case 0x0D:  // ORA, absolute
+            switch (this->counter) {
+            case 3:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);  // target address low
+                break;
+            case 2:
+                tmp[1] = this->addrSpace.r8(this->PC.W++);  // target address high
+                break;
+            case 1:
+                this->A |= this->addrSpace.r8((tmp[1] << 8) + tmp[0]);
+            
+                if (this->A != 0) this->P &= ~(uint8_t)Flags::ZERO;
+                else this->P |= (uint8_t)Flags::ZERO;
+                
+                if (this->A & 0x80) this->P |= (uint8_t)Flags::NEGATIVE;
+                else this->P &= ~(uint8_t)Flags::NEGATIVE;
+                break;
+            }
+            break;
+        case 0x0E:  // ASL, absolute
+            switch (this->counter) {
+            case 5:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);     // target address low
+                break;
+            case 4:
+                tmp[1] = this->addrSpace.r8(this->PC.W++);     // target address high
+                break;
+            case 3:
+                tmp[2] = this->addrSpace.r8((tmp[1] << 8) + tmp[0]);
+                break;
+            case 2:
+                if (tmp[2] & 0x80) this->P |= (uint8_t)Flags::CARRY;
+                else this->P &= ~(uint8_t)Flags::CARRY;
+                
+                tmp[2] <<= 1;
+                
+                if (tmp[2] & 0x80) this->P |= (uint8_t)Flags::NEGATIVE;
+                else this->P &= ~(uint8_t)Flags::NEGATIVE;
+                
+                if (!tmp[2]) this->P |= (uint8_t)Flags::ZERO;
+                else this->P &= ~(uint8_t)Flags::ZERO;
+                break;
+            case 1:
+                this->addrSpace.w8((tmp[1] << 8) + tmp[0], tmp[2]);
+                break;
+            }
+            break;
+        
+        case 0x10:  // BPL, relative
+            switch (this->counter) {
+            case 1:
+                switch (tmp[1]) {
+                case 0:
+                    tmp[0] = this->addrSpace.r8(this->PC.W);                // branch offset
+                    //uint16_t target = this->PC.W + (int8_t)tmp[0];          // branch target
+                    tmp[1] = (this->PC.W / 256 == (this->PC.W + (int8_t)tmp[0]) / 256) ? 1 : 2;    // extra cycles
+                    //this->counter += tmp[1];
+                    this->counter++;
+                    this->PC.W++;
+                    break;
+                case 2:
+                    tmp[1]--;
+                    this->counter++;
+                    break;
+                case 1:
+                    //this->PC.W = this->PC.W
+                    if (this->P & (uint8_t)Flags::NEGATIVE) {
+                        this->PC.W++;
+                    }
+                    else {
+                        this->PC.W += (int8_t)tmp[0];
+                    }
+                    break;
+                }
+                break;
+            }
+            break;
+        case 0x11:  // ORA, indexed, indirect, Y
+            switch (this->counter) {
+            case 4:
+                break;
+            case 3:
+                break;
+            case 2:
+                break;
+            case 1:
+                break;
+            }
+            break;
+        //default:    // Unsupported opcode
+        //    std::cerr << Invalid opcode << this->IR
         }
     }
     

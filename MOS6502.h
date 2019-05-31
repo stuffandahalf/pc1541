@@ -20,7 +20,6 @@ private:
     AddressSpace& addrSpace;
     
     uint8_t counter;    // remaining cycles for opcode
-    uint8_t opcode;
     
 public:
     enum class Vectors : uint16_t {

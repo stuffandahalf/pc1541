@@ -13,9 +13,10 @@ CBM1541::CBM1541(std::string romPath) {
     //this->addrSpace->map(0x1C00, this->motorHeadVia->getRegisters());
     this->addrSpace->map(0xC000, *this->rom);
     
-    for (int i = 0xC000; i <= 0xFFFF; i++) {
+    /*for (int i = 0xC000; i <= 0xFFFF; i++) {
         printf("%X\n", this->addrSpace->r8(i));
-    }
+    }*/
+    //printf("%X\n", this->addrSpace->r8(0xEAA0));
     
     this->cpu->reset();
     
