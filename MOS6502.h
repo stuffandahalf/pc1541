@@ -45,6 +45,7 @@ public:
     void reset();
     void step();
     inline bool checkFlag(Flags f) const;
+    inline bool setFlag(bool condition, Flags f);
     
     friend std::ostream& operator <<(std::ostream& os, const MOS6502& cpu);
 };
