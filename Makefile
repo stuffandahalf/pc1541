@@ -1,4 +1,4 @@
-CC=g++
+CC=c++
 CFLAGS=-c -std=c++11
 LFLAGS=
 OBJS=main.o CBM1541.o Memory.o MOS6502.o MOS6522.o
