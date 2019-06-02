@@ -9,8 +9,8 @@ CBM1541::CBM1541(std::string romPath) {
     this->motorHeadVia = new MOS6522();
     
     this->addrSpace->map(0x0000, *this->ram);
-    //this->addrSpace->map(0x1800, this->serialVia->getRegisters());
-    //this->addrSpace->map(0x1C00, this->motorHeadVia->getRegisters());
+    this->addrSpace->map(0x1800, this->serialVia->getRegisters());
+    this->addrSpace->map(0x1C00, this->motorHeadVia->getRegisters());
     this->addrSpace->map(0xC000, *this->rom);
     
     /*for (int i = 0xC000; i <= 0xFFFF; i++) {

@@ -612,18 +612,69 @@ void MOS6502::cycle() {
             }
             break;
             
-        case 0x8E:  // STX, absolute
+        case 0x8A:  // TXA
             switch (this->counter) {
-            case 3:
-            
-                break;
-            case 2:
-                break;
             case 1:
+                this->A = this->X;
+                this->setFlag(!this->A, Flags::ZERO);
+                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
                 break;
             }
             break;
             
+        case 0x8E:  // STX, absolute
+            switch (this->counter) {
+            case 3:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 2:
+                tmp[1] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 1:
+                //std::cout << std::hex << (tmp[1] << 8) + tmp[0] << std::dec << std::endl;
+                this->addrSpace.w8((tmp[1] << 8) + tmp[0], this->X);
+                break;
+            }
+            break;
+            
+        case 0x8D:  // STA, absolute
+            switch (this->counter) {
+            case 3:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);  // target address low
+                break;
+            case 2:
+                tmp[1] = this->addrSpace.r8(this->PC.W++);  // target address high
+                break;
+            case 1:
+                this->addrSpace.w8((tmp[1] << 8) + tmp[0], this->A);
+                break;
+            }
+            break;
+            
+        case 0x95:  // STA, zero page, indexed X
+            switch (this->counter) {
+            case 3:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 2:
+                //tmp[1] = this->addrSpace.r8((uint8_t)(tmp[0] + this->X));
+                // dummy read
+                break;
+            case 1:
+                this->addrSpace.w8((uint8_t)(tmp[0] + this->X), this->A);
+                break;
+            }
+            break;
+            
+        case 0xA0:  // LDY, immediate
+            switch (this->counter) {
+            case 1:
+                this->Y = this->addrSpace.r8(this->PC.W++);
+                this->setFlag(!this->Y, Flags::ZERO);
+                this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
+            }
+            break;
+        
         case 0xA2:  // LDX, immediate
             switch (this->counter) {
             case 1:
@@ -633,10 +684,56 @@ void MOS6502::cycle() {
             }
             break;
             
+        case 0xA9:  // LDA, immediate
+            switch (this->counter) {
+            case 1:
+                this->A = this->addrSpace.r8(this->PC.W++);
+                this->setFlag(!this->A, Flags::ZERO);
+                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+            }
+            break;
+            
+        case 0xD0:  // BNE, relative
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                std::cout << (int)(int8_t)tmp[0] << std::endl;
+                this->counter = 3;  // decrements to 2
+                break;
+            case 2:
+                if (!this->checkFlag(Flags::ZERO)) {
+                    tmp[1] = this->PC.B.l;
+                    tmp[2] = this->PC.B.h;
+                    this->PC.B.l += (int8_t)tmp[0];
+                    if (tmp[2] != this->PC.B.h) {
+                        this->counter = 4;  // decrements to 3
+                        break;
+                    }
+                }
+                this->counter = 1;
+                break;
+            case 3:
+                this->PC.B.l = tmp[1];
+                this->PC.W += (int8_t)tmp[0];
+                this->counter = 1;
+                break;
+            }
+            break;
+            
         case 0xD8:  // CLD
             switch (this->counter) {
             case 1:
                 this->setFlag(false, Flags::DECIMAL);
+                break;
+            }
+            break;
+            
+        case 0xE8:  // INX
+            switch (this->counter) {
+            case 1:
+                this->X++;
+                this->setFlag(!this->X, Flags::ZERO);
+                this->setFlag(this->X & 0x80, Flags::NEGATIVE);
                 break;
             }
             break;

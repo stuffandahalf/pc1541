@@ -19,11 +19,11 @@ public:
         Byte(uint8_t *ptr);
         Byte(uint8_t *readPtr, uint8_t *writePtr);
         
-        inline uint8_t read() {
+        virtual inline uint8_t read() {
             return this->readPtr ? *this->readPtr : 0xFF;
         }
         
-        inline void write(uint8_t b) { 
+        virtual inline void write(uint8_t b) { 
             if (this->writePtr) {
                 *this->writePtr = b;
             }
