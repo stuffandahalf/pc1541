@@ -587,9 +587,30 @@ void MOS6502::cycle() {
                 this->setFlag(false, Flags::CARRY);
             }
             break;
-        case 0x19:
+        case 0x19:  // ORA, absolute, Y
             switch (this->counter) {
-                
+                case 3:
+                    tmp[0] = this->addrSpace.r8(this->PC.W++);  // address low
+                    break;
+                case 2:
+                    tmp[1] = this->addrSpace.r8(this->PC.W++);  // address high
+                    tmp[2] = tmp[0] + this->Y;
+                    break;
+                case 1:
+                    if (tmp[1] != (((uint16_t)tmp[0] + this->Y) >> 8)) {
+                        this->counter = 5; // decremented to 4
+                    }
+                    else {
+                        this->A |= this->addrSpace.r8((tmp[1] << 8) + tmp[2]);
+                        this->setFlag(!this->A, Flags::ZERO);
+                        this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                    }
+                    break;
+                case 4:
+                    tmp[1] = ((uint16_t)tmp[0] + this->Y) >> 8;
+                    this->A |= this->addrSpace.r8((tmp[1] << 8) + tmp[2]);
+                    this->setFlag(!this->A, Flags::ZERO);
+                    this->setFlag(this->A & 0x80, Flags::NEGATIVE);
             }
             break;
             

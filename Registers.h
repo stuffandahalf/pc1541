@@ -25,7 +25,7 @@ private:
     bool updated;
     
 public:
-    Registers();
+    Registers(std::size_t size);
     ~Registers();
     
     virtual AddressSpace::Byte **getBytes() override;

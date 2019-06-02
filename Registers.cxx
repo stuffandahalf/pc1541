@@ -1,7 +1,7 @@
 #include "Registers.h"
 
-Registers::Registers() {
-    this->size = 17;
+Registers::Registers(std::size_t size) {
+    this->size = size;
     this->rawBuffer = new uint8_t[this->size];
     this->registers = new AddressSpace::Byte *[this->size];
     for (int i = 0; i < this->size; i++) {
