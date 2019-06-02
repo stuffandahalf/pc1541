@@ -27,13 +27,21 @@ CBM1541::~CBM1541() {
     delete this->motorHeadVia;
     delete this->serialVia;
     delete this->cpu;
+    delete this->ram;
     delete this->rom;
     delete this->addrSpace;
 }
 
 void CBM1541::execute() {
-    for(;;) {
+    char in;
+    
+    std::cout << *this->cpu << std::endl;
+    //for(int i = 0; i < 1; i++) {
+    for (;;) {
         // load data from arduino into serial via port
         this->cpu->step();
+        std::cout << *this->cpu << std::endl;
+        std::cin >> in;
     }
+    //this->cpu->step();
 }

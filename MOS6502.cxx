@@ -148,28 +148,148 @@ static Instruction instructions[16][16] = {
         { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     },
     { // 0x8*
-        
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "STA", 0x81, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "STY", 0x84, 2, 3, i_t::CycleMod::NONE },
+        { "STA", 0x85, 2, 3, i_t::CycleMod::NONE },
+        { "STX", 0x86, 2, 3, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "DEY", 0x88, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "TXA", 0x8A, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "STY", 0x8C, 3, 4, i_t::CycleMod::NONE },
+        { "STA", 0x8D, 3, 4, i_t::CycleMod::NONE },
+        { "STX", 0x8E, 3, 4, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     },
     { // 0x9*
-        
+        { "BCC", 0x90, 2, 2, i_t::CycleMod::MOD2 },
+        { "STA", 0x91, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "STY", 0x94, 2, 4, i_t::CycleMod::NONE },
+        { "STA", 0x95, 2, 4, i_t::CycleMod::NONE },
+        { "STX", 0x96, 2, 4, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "TYA", 0x98, 1, 2, i_t::CycleMod::NONE },
+        { "STA", 0x99, 3, 5, i_t::CycleMod::NONE },
+        { "TXS", 0x9A, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "STA", 0x9D, 3, 5, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     },
     { // 0xA*
-        
+        { "LDY", 0xA0, 2, 2, i_t::CycleMod::NONE },
+        { "LDA", 0xA1, 2, 6, i_t::CycleMod::NONE },
+        { "LDX", 0xA2, 2, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "LDY", 0xA4, 2, 3, i_t::CycleMod::NONE },
+        { "LDA", 0xA5, 2, 3, i_t::CycleMod::NONE },
+        { "LDX", 0xA6, 2, 3, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "TAY", 0xA8, 1, 2, i_t::CycleMod::NONE },
+        { "LDA", 0xA9, 2, 2, i_t::CycleMod::NONE },
+        { "TAX", 0xAA, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "LDY", 0xAC, 3, 4, i_t::CycleMod::NONE },
+        { "LDA", 0xAD, 3, 4, i_t::CycleMod::NONE },
+        { "LDX", 0xAE, 3, 4, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     },
     { // 0xB*
-        
+        { "BCS", 0xB0, 2, 2, i_t::CycleMod::MOD2 },
+        { "LDA", 0xB1, 2, 5, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "LDY", 0xB4, 2, 4, i_t::CycleMod::NONE },
+        { "LDA", 0xB5, 2, 4, i_t::CycleMod::NONE },
+        { "LDX", 0xB6, 2, 4, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "CLV", 0xB8, 1, 2, i_t::CycleMod::NONE },
+        { "LDA", 0xB9, 3, 4, i_t::CycleMod::MOD1 },
+        { "TSX", 0xBA, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "LDY", 0xBC, 3, 4, i_t::CycleMod::MOD1 },
+        { "LDA", 0xBD, 3, 4, i_t::CycleMod::MOD1 },
+        { "LDX", 0xBE, 3, 4, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     },
     { // 0xC*
-        
+        { "CPY", 0xC0, 2, 2, i_t::CycleMod::NONE },
+        { "CMP", 0xC1, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "CPY", 0xC4, 2, 3, i_t::CycleMod::NONE },
+        { "CMP", 0xC5, 2, 3, i_t::CycleMod::NONE },
+        { "DEC", 0xC6, 2, 5, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INY", 0xC8, 1, 2, i_t::CycleMod::NONE },
+        { "CMP", 0xC9, 2, 2, i_t::CycleMod::NONE },
+        { "INY", 0xCA, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "CPY", 0xCC, 3, 4, i_t::CycleMod::NONE },
+        { "CMP", 0xCD, 3, 4, i_t::CycleMod::NONE },
+        { "DEC", 0xCD, 3, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     },
     { // 0xD*
-        
+        { "BNE", 0xD0, 2, 2, i_t::CycleMod::MOD2 },
+        { "CMP", 0xD1, 2, 5, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "CMP", 0xD5, 2, 4, i_t::CycleMod::NONE },
+        { "DEC", 0xD6, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "CLD", 0xD8, 1, 2, i_t::CycleMod::NONE },
+        { "CMP", 0xD9, 3, 4, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "CMP", 0xDD, 3, 4, i_t::CycleMod::MOD1 },
+        { "DEC", 0xDE, 3, 7, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     },
     { // 0xE*
-        
+        { "CPX", 0xE0, 2, 2, i_t::CycleMod::NONE },
+        { "SBC", 0xE1, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "CPX", 0xE4, 2, 3, i_t::CycleMod::NONE },
+        { "SBC", 0xE5, 2, 3, i_t::CycleMod::NONE },
+        { "INC", 0xE6, 2, 5, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INX", 0xE8, 1, 2, i_t::CycleMod::NONE },
+        { "SBC", 0xE9, 2, 2, i_t::CycleMod::NONE },
+        { "NOP", 0xEA, 1, 2, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "CPX", 0xE4, 3, 4, i_t::CycleMod::NONE },
+        { "SBC", 0xE5, 3, 4, i_t::CycleMod::NONE },
+        { "INC", 0xE6, 3, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     },
     { // 0xF*
-        
+        { "BEQ", 0xF0, 2, 2, i_t::CycleMod::MOD2 },
+        { "SBC", 0xF1, 2, 5, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "SBC", 0xF5, 2, 4, i_t::CycleMod::NONE },
+        { "INC", 0xF6, 2, 6, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "SED", 0xF8, 1, 2, i_t::CycleMod::NONE },
+        { "SBC", 0xF9, 3, 4, i_t::CycleMod::MOD1 },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
+        { "SBC", 0xFD, 3, 4, i_t::CycleMod::MOD1 },
+        { "INC", 0xFE, 3, 7, i_t::CycleMod::NONE },
+        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     }
 };
 
@@ -184,6 +304,7 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     this->P = 32;           // All flags 0 except for unused flag
     
     this->counter = 0;
+    this->cycles = 0;
 }
 
 void MOS6502::reset() {
@@ -197,6 +318,12 @@ void MOS6502::reset() {
 }
 
 void MOS6502::step() {
+    do {
+        this->cycle();
+    } while (this->counter);
+}
+
+void MOS6502::cycle() {
     static uint8_t tmp[3] = { 0 };  // temporary data used between cycles
     
     if (this->counter == 0) {
@@ -211,25 +338,25 @@ void MOS6502::step() {
         case 0x00:  // BRK
             switch (this->counter) {
             case 6:
-                this->addrSpace.w8(0x100 | this->SP--, this->PC.B.h);
+                // dummy read
+                this->PC.W++;
                 break;
             case 5:
-                this->addrSpace.w8(0x100 | this->SP--, this->PC.B.l);
-                break;
-            case 4:
                 this->setFlag(true, Flags::BREAK);
                 this->setFlag(true, Flags::IRQ);
-                this->addrSpace.w8(0x100 | this->SP--, this->P);
+                this->addrSpace.w8(0x100 | this->SP--, this->PC.B.h);
+                break;
+            case 4:
+                this->addrSpace.w8(0x100 | this->SP--, this->PC.B.l);
                 break;
             case 3:
-                tmp[0] = this->addrSpace.r8((uint16_t)Vectors::BRK);      // target addr low
+                this->addrSpace.w8(0x100 | this->SP--, this->P);
                 break;
             case 2:
-                tmp[1] = this->addrSpace.r8((uint16_t)Vectors::BRK + 1);  // target addr high
+                this->PC.B.l = this->addrSpace.r8((uint16_t)Vectors::BRK);      // target addr low
                 break;
             case 1:
-                this->PC.B.l = tmp[0];
-                this->PC.B.h = tmp[1];
+                this->PC.B.h = this->addrSpace.r8((uint16_t)Vectors::BRK + 1);  // target addr high
             }
             break;
         case 0x01:  // ORA, indexed, indirect, X
@@ -255,9 +382,10 @@ void MOS6502::step() {
         case 0x05:  // ORA, zero page
             switch (this->counter) {
             case 2:
-                this->A |= this->addrSpace.r8(this->addrSpace.r8(this->PC.W++));
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
                 break;
             case 1:
+                this->A |= this->addrSpace.r8(tmp[0]);
                 this->setFlag(!this->A, Flags::ZERO);
                 this->setFlag(this->A & 0x80, Flags::NEGATIVE);
                 break;
@@ -273,9 +401,10 @@ void MOS6502::step() {
                 tmp[2] = tmp[1] << 1;                   // updated value
                 break;
             case 2:
-                this->addrSpace.w8(tmp[0], tmp[2]);
+                this->addrSpace.w8(tmp[0], tmp[1]);
                 break;
             case 1:
+                this->addrSpace.w8(tmp[0], tmp[2]);
                 this->setFlag(!tmp[2], Flags::ZERO);
                 this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
                 this->setFlag(tmp[1] & 0x80, Flags::CARRY);
@@ -285,9 +414,10 @@ void MOS6502::step() {
         case 0x08:  // PHP
             switch (this->counter) {
             case 2:
-                this->addrSpace.w8(0x100 | this->SP, this->P); 
+                // dummy cycle
                 break;
             case 1:
+                this->addrSpace.w8(0x100 | this->SP, this->P); 
                 this->SP--;
                 break;
             }
@@ -342,6 +472,8 @@ void MOS6502::step() {
                 tmp[2] = this->addrSpace.r8((tmp[1] << 8) + tmp[0]);
                 break;
             case 2:
+                //this->addrSpace.w8(tmp[2], (tmp[1] << 8) + tmp[0]); // dummy write, might not need?
+            
                 this->setFlag(tmp[2] & 0x80, Flags::CARRY);
                 
                 tmp[2] <<= 1;
@@ -460,6 +592,54 @@ void MOS6502::step() {
                 
             }
             break;
+            
+        case 0x4C:  // JMP, absolute
+            switch (this->counter) {
+            case 2:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 1:
+                this->PC.B.h = this->addrSpace.r8(this->PC.W);
+                this->PC.B.l = tmp[0];
+                break;
+            }
+            break;
+            
+        case 0x78:  // SEI
+            switch (this->counter) {
+            case 1:
+                this->setFlag(true, Flags::IRQ);
+            }
+            break;
+            
+        case 0x8E:  // STX, absolute
+            switch (this->counter) {
+            case 3:
+            
+                break;
+            case 2:
+                break;
+            case 1:
+                break;
+            }
+            break;
+            
+        case 0xA2:  // LDX, immediate
+            switch (this->counter) {
+            case 1:
+                this->X = this->addrSpace.r8(this->PC.W++);
+                this->setFlag(!this->X, Flags::ZERO);
+                break;
+            }
+            break;
+            
+        case 0xD8:  // CLD
+            switch (this->counter) {
+            case 1:
+                this->setFlag(false, Flags::DECIMAL);
+                break;
+            }
+            break;
         /*default:    // Unsupported opcode
             std::cerr << "Instruction not implemented yet" << std::endl;
             this->counter = 0;*/
@@ -467,6 +647,7 @@ void MOS6502::step() {
     }
     
     this->counter--;
+    this->cycles++;
 }
 
 inline bool MOS6502::checkFlag(Flags f) const {
@@ -484,11 +665,11 @@ inline bool MOS6502::setFlag(bool condition, Flags f) {
 }
 
 std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
-    os << "A:\t" << (int)cpu.A << std::endl
-       << "X:\t" << (int)cpu.X << std::endl
-       << "Y:\t" << (int)cpu.Y << std::endl
-       << "SP:\t" << (int)cpu.SP << std::endl
-       << "PC:\t" << (int)cpu.PC.W << std::endl
+    os << "A:\t" << std::hex << (int)cpu.A << std::endl
+       << "X:\t" << std::hex << (int)cpu.X << std::endl
+       << "Y:\t" << std::hex << (int)cpu.Y << std::endl
+       << "SP:\t" << std::hex << (int)cpu.SP << std::endl
+       << "PC:\t" << std::hex << (int)cpu.PC.W << std::endl
        << "Flags" << std::endl
        /*<< "N: " << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << " "
        << "V: " << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "
@@ -501,7 +682,8 @@ std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
        << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "
        << cpu.checkFlag(MOS6502::Flags::BREAK) << cpu.checkFlag(MOS6502::Flags::DECIMAL) << cpu.checkFlag(MOS6502::Flags::IRQ)
        << cpu.checkFlag(MOS6502::Flags::ZERO) << cpu.checkFlag(MOS6502::Flags::CARRY)
-       << std::endl;
+       << std::endl
+       << "Cycles:\t" << std::dec << cpu.cycles << std::endl;
        
     return os;
 }

@@ -20,6 +20,7 @@ private:
     AddressSpace& addrSpace;
     
     uint8_t counter;    // remaining cycles for opcode
+    size_t cycles;      // total executed cycles since reset
     
 public:
     enum class Vectors : uint16_t {
@@ -44,6 +45,7 @@ public:
 
     void reset();
     void step();
+    void cycle();
     inline bool checkFlag(Flags f) const;
     inline bool setFlag(bool condition, Flags f);
     
