@@ -1,7 +1,7 @@
 #include "MOS6522.h"
 
 MOS6522::MOS6522() {
-    this->regs = new Registers();
+    this->regs = new Registers(17);
 }
 
 MOS6522::~MOS6522() {
