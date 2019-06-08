@@ -652,7 +652,9 @@ void MOS6502::cycle() {
                 tmp[1] = this->addrSpace.r8(this->PC.W++);
                 break;
             case 1:
-                //std::cout << std::hex << (tmp[1] << 8) + tmp[0] << std::dec << std::endl;
+#ifdef DEBUG
+                addrout((tmp[1] << 8) + tmp[0]);
+#endif
                 this->addrSpace.w8((tmp[1] << 8) + tmp[0], this->X);
                 break;
             }
@@ -667,6 +669,9 @@ void MOS6502::cycle() {
                 tmp[1] = this->addrSpace.r8(this->PC.W++);  // target address high
                 break;
             case 1:
+#ifdef DEBUG
+                addrout((tmp[1] << 8) + tmp[0]);
+#endif
                 this->addrSpace.w8((tmp[1] << 8) + tmp[0], this->A);
                 break;
             }
@@ -682,6 +687,9 @@ void MOS6502::cycle() {
                 // dummy read
                 break;
             case 1:
+#ifdef DEBUG
+                addrout(tmp[0] + this->X);
+#endif
                 this->addrSpace.w8((uint8_t)(tmp[0] + this->X), this->A);
                 break;
             }
@@ -690,6 +698,9 @@ void MOS6502::cycle() {
         case 0xA0:  // LDY, immediate
             switch (this->counter) {
             case 1:
+#ifdef DEBUG
+                addrout(this->PC.W);
+#endif
                 this->Y = this->addrSpace.r8(this->PC.W++);
                 this->setFlag(!this->Y, Flags::ZERO);
                 this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
@@ -699,6 +710,9 @@ void MOS6502::cycle() {
         case 0xA2:  // LDX, immediate
             switch (this->counter) {
             case 1:
+#ifdef DEBUG
+                addrout(this->PC.W);
+#endif
                 this->X = this->addrSpace.r8(this->PC.W++);
                 this->setFlag(!this->X, Flags::ZERO);
                 break;
@@ -708,6 +722,9 @@ void MOS6502::cycle() {
         case 0xA9:  // LDA, immediate
             switch (this->counter) {
             case 1:
+#ifdef DEBUG
+                addrout(this->PC.W);
+#endif
                 this->A = this->addrSpace.r8(this->PC.W++);
                 this->setFlag(!this->A, Flags::ZERO);
                 this->setFlag(this->A & 0x80, Flags::NEGATIVE);

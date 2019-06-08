@@ -7,6 +7,9 @@
 #include "types.h"
 #include "Memory.h"
 
+#define DEBUG
+#define addrout(addr) std::cout << std::hex << (addr) << std::dec << std::endl;
+
 class MOS6502 {
 private:
     uint8_t IR;     // Instruction register (current opcode)
