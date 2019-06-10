@@ -6,11 +6,12 @@
 #include "cpuemu.h"
 #include "types.h"
 #include "Memory.h"
+#include "IClockable.h"
 
 #define DEBUG
 #define addrout(addr) std::cout << std::hex << (addr) << std::dec << std::endl;
 
-class MOS6502 {
+class MOS6502 : IClockable {
 private:
     uint8_t IR;     // Instruction register (current opcode)
     uint8_t A;      // Accumulator

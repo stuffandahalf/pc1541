@@ -3,10 +3,11 @@
 
 #include "Memory.h"
 #include "Registers.h"
+#include "IClockable.h"
 
 class MOS6522;
 
-class MOS6522 {
+class MOS6522 : IClockable {
 public:
     enum RegIndex {
         PORTB = 0,
@@ -36,6 +37,7 @@ public:
     ~MOS6522();
     
     Registers& getRegisters();
+    virtual void cycle() override;
 };
 
 #endif

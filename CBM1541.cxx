@@ -33,11 +33,10 @@ CBM1541::~CBM1541() {
 }
 
 void CBM1541::execute() {
-    char in;
+    char in = 's';
     
     std::cout << *this->cpu << std::endl;
-    //for(int i = 0; i < 1; i++) {
-    for (;;) {
+    for (;in == 's';) {
         // load data from arduino into serial via port
         this->cpu->step();
         std::cout << *this->cpu << std::endl;

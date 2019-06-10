@@ -11,3 +11,7 @@ MOS6522::~MOS6522() {
 Registers& MOS6522::getRegisters() {
     return *this->regs;
 }
+
+void MOS6522::cycle() {
+    
+}
