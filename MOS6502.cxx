@@ -731,6 +731,16 @@ void MOS6502::cycle() {
             }
             break;
             
+        case 0xC8:  // INY
+            switch (this->counter) {
+            case 1:
+                this->Y++;
+                this->setFlag(!this->Y, Flags::ZERO);
+                this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
+                break;
+            }
+            break;
+            
         case 0xD0:  // BNE, relative
             switch (this->counter) {
             case 1:
