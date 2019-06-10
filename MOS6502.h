@@ -49,7 +49,7 @@ public:
 
     void reset();
     void step();
-    void cycle();
+    virtual void cycle() override;
     inline bool checkFlag(Flags f) const;
     inline bool setFlag(bool condition, Flags f);
     

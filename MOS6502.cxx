@@ -758,6 +758,23 @@ void MOS6502::cycle() {
             }
             break;
             
+        case 0xD5:  // CMP, zero page, X
+            switch (this->counter) {
+            case 3:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 2:
+                tmp[1] = this->addrSpace.r8((this->X + tmp[0]) & 0xFF);
+                break;
+            case 1:
+                tmp[2] = this->A - tmp[1];
+                this->setFlag(!(tmp[2]), Flags::ZERO);
+                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
+                this->setFlag(this->A >= tmp[1], Flags::CARRY);
+                break;
+            }
+            break;
+            
         case 0xD8:  // CLD
             switch (this->counter) {
             case 1:
@@ -775,9 +792,34 @@ void MOS6502::cycle() {
                 break;
             }
             break;
+            
+        case 0xF6:  // INC, zero page, X
+            switch (this->counter) {
+            case 5:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 4:
+                tmp[0] += this->X;
+                break;
+            case 3:
+                tmp[1] = this->addrSpace.r8(tmp[0]);
+                break;
+            case 2:
+                tmp[2] = tmp[1] + 1;
+                break;
+            case 1:
+                this->addrSpace.w8(tmp[0], tmp[2]);
+                this->setFlag(!tmp[2], Flags::ZERO);
+                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
+                break;
+            }
+            break;
+            
         /*default:    // Unsupported opcode
             std::cerr << "Instruction not implemented yet" << std::endl;
             this->counter = 0;*/
+        default:
+            exit(0);
         }
     }
     
