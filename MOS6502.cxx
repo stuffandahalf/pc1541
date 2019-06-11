@@ -633,6 +633,27 @@ void MOS6502::cycle() {
             }
             break;
             
+        case 0x85:  // STA, zero page
+            switch (this->counter) {
+            case 2:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 1:
+                this->addrSpace.w8(tmp[0], this->A);
+                break;
+            }
+            break;
+        case 0x86:  // STX, zero page
+            switch (this->counter) {
+            case 2:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 1:
+                this->addrSpace.w8(tmp[0], this->X);
+                break;
+            }
+            break;
+            
         case 0x8A:  // TXA
             switch (this->counter) {
             case 1:
@@ -677,6 +698,22 @@ void MOS6502::cycle() {
             }
             break;
             
+        case 0x94:  // STY, zero page, indexed X
+            switch (this->counter) {
+            case 3:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 2:
+                tmp[1] = tmp[0] + this->X;
+#ifdef DEBUG
+                addrout((int)tmp[1]);
+#endif
+                break;
+            case 1:
+                this->addrSpace.w8(tmp[1], this->Y);
+                break;
+            }
+            break;
         case 0x95:  // STA, zero page, indexed X
             switch (this->counter) {
             case 3:
@@ -719,6 +756,15 @@ void MOS6502::cycle() {
             }
             break;
             
+        case 0xA8:  // TAY
+            switch (this->counter) {
+            case 1:
+                this->Y = this->A;
+                this->setFlag(!this->Y, Flags::ZERO);
+                this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
+                break;
+            }
+            break;
         case 0xA9:  // LDA, immediate
             switch (this->counter) {
             case 1:
@@ -728,6 +774,44 @@ void MOS6502::cycle() {
                 this->A = this->addrSpace.r8(this->PC.W++);
                 this->setFlag(!this->A, Flags::ZERO);
                 this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+            }
+            break;
+            
+        case 0xB5:  // LDA, zero page, indexed X
+            switch (this->counter) {
+            case 3:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 2:
+                tmp[1] = tmp[0] + this->X;
+#ifdef DEBUG
+                addrout((int)tmp[1]);
+#endif
+                break;
+            case 1:
+                this->A = this->addrSpace.r8(tmp[1]);
+                this->setFlag(!this->A, Flags::ZERO);
+                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                break;
+            }
+            break;
+            
+        case 0xC6:  // DEC, zero page
+            switch (this->counter) {
+            case 4:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 3:
+                tmp[1] = this->addrSpace.r8(tmp[0]);
+                break;
+            case 2:
+                tmp[2] = tmp[1] - 1;
+                break;
+            case 1:
+                this->addrSpace.w8(tmp[0], tmp[2]);
+                this->setFlag(!tmp[2], Flags::ZERO);
+                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
+                break;
             }
             break;
             
@@ -745,7 +829,9 @@ void MOS6502::cycle() {
             switch (this->counter) {
             case 1:
                 tmp[0] = this->addrSpace.r8(this->PC.W++);
+#ifdef DEBUG
                 std::cout << (int)(int8_t)tmp[0] << std::endl;
+#endif
                 this->counter = 3;  // decrements to 2
                 break;
             case 2:
@@ -789,6 +875,25 @@ void MOS6502::cycle() {
             switch (this->counter) {
             case 1:
                 this->setFlag(false, Flags::DECIMAL);
+                break;
+            }
+            break;
+            
+        case 0xE6:  // INC, zero page
+            switch (this->counter) {
+            case 4:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 3:
+                tmp[1] = this->addrSpace.r8(tmp[0]);
+                break;
+            case 2:
+                tmp[2] = tmp[1] + 1;
+                break;
+            case 1:
+                this->addrSpace.w8(tmp[0], tmp[2]);
+                this->setFlag(!tmp[2], Flags::ZERO);
+                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
                 break;
             }
             break;
