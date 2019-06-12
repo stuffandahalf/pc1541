@@ -355,15 +355,14 @@ inline void MOS6502::ORA(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ZERO_PAGE:
     case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
+    case AddressMode::ABSOLUTE_X:
+    case AddressMode::ABSOLUTE_Y:
     case AddressMode::INDIRECT_INDEXED:
+    case AddressMode::INDEXED_INDIRECT:
         var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
-    case AddressMode::ABSOLUTE_X:
-        break;
-    case AddressMode::ABSOLUTE_Y:
-        break;
-    case AddressMode::INDEXED_INDIRECT:
-        break;
+    //default:
+        // die
     }
     
     va_end(args);
@@ -385,14 +384,11 @@ inline void MOS6502::AND(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ZERO_PAGE:
     case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
-    case AddressMode::INDIRECT_INDEXED:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
     case AddressMode::ABSOLUTE_X:
-        break;
     case AddressMode::ABSOLUTE_Y:
-        break;
+    case AddressMode::INDIRECT_INDEXED:
     case AddressMode::INDEXED_INDIRECT:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     }
     
@@ -415,15 +411,11 @@ inline void MOS6502::EOR(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ZERO_PAGE:
     case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
-    case AddressMode::INDIRECT_INDEXED:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
-        break;
     case AddressMode::ABSOLUTE_X:
-        break;
     case AddressMode::ABSOLUTE_Y:
-        break;
+    case AddressMode::INDIRECT_INDEXED:
     case AddressMode::INDEXED_INDIRECT:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     }
     
@@ -446,14 +438,11 @@ inline void MOS6502::ADC(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ZERO_PAGE:
     case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
-    case AddressMode::INDIRECT_INDEXED:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
     case AddressMode::ABSOLUTE_X:
-        break;
     case AddressMode::ABSOLUTE_Y:
-        break;
+    case AddressMode::INDIRECT_INDEXED:
     case AddressMode::INDEXED_INDIRECT:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     }
     
@@ -475,15 +464,11 @@ inline void MOS6502::STA(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ZERO_PAGE:
     case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
-    case AddressMode::INDIRECT_INDEXED:
-        targetAddr = (uint16_t)va_arg(args, uint);
-        break;
-        break;
     case AddressMode::ABSOLUTE_X:
-        break;
     case AddressMode::ABSOLUTE_Y:
-        break;
+    case AddressMode::INDIRECT_INDEXED:
     case AddressMode::INDEXED_INDIRECT:
+        targetAddr = (uint16_t)va_arg(args, uint);
         break;
     }
     
@@ -504,14 +489,11 @@ inline void MOS6502::LDA(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ZERO_PAGE:
     case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
-    case AddressMode::INDIRECT_INDEXED:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
     case AddressMode::ABSOLUTE_X:
-        break;
     case AddressMode::ABSOLUTE_Y:
-        break;
+    case AddressMode::INDIRECT_INDEXED:
     case AddressMode::INDEXED_INDIRECT:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     }
     
@@ -534,14 +516,11 @@ inline void MOS6502::CMP(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ZERO_PAGE:
     case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
-    case AddressMode::INDIRECT_INDEXED:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
     case AddressMode::ABSOLUTE_X:
-        break;
     case AddressMode::ABSOLUTE_Y:
-        break;
+    case AddressMode::INDIRECT_INDEXED:
     case AddressMode::INDEXED_INDIRECT:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     }
     
@@ -564,14 +543,11 @@ inline void MOS6502::SBC(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ZERO_PAGE:
     case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
-    case AddressMode::INDIRECT_INDEXED:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
     case AddressMode::ABSOLUTE_X:
-        break;
     case AddressMode::ABSOLUTE_Y:
-        break;
+    case AddressMode::INDIRECT_INDEXED:
     case AddressMode::INDEXED_INDIRECT:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     }
     
