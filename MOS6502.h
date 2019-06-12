@@ -71,6 +71,8 @@ public:
     friend std::ostream& operator <<(std::ostream& os, const MOS6502& cpu);
     
 private:
+    
+
     void ORA(AddressMode addressMode, ...);
     void AND(AddressMode addressMode, ...);
     void EOR(AddressMode addressMode, ...);
@@ -80,7 +82,15 @@ private:
     void CMP(AddressMode addressMode, ...);
     void SBC(AddressMode addressMode, ...);
     
-    
+    void ASL(AddressMode addressMode, ...);
+    void ROL(AddressMode addressMode, ...);
+    void LSR(AddressMode addressMode, ...);
+    void ROR(AddressMode addressMode, ...);
+    void STX(AddressMode addressMode, ...);
+    void LDX(AddressMode addressMode, ...);
+    void DEC(AddressMode addressMode, ...);
+    void INC(AddressMode addressMode, ...);
+
     typedef void (MOS6502::*operation_t)(MOS6502::AddressMode addressMode, ...);
     operation_t operations[4][8];
 };

@@ -341,7 +341,7 @@ void MOS6502::reset() {
     this->IR = this->addrSpace.r8(this->PC.W++);
 }
 
-
+/* Instruction group 1 */
 inline void MOS6502::ORA(MOS6502::AddressMode addressMode, ...) {
     va_list args;
     va_start(args, addressMode);
@@ -560,7 +560,31 @@ inline void MOS6502::SBC(MOS6502::AddressMode addressMode, ...) {
     this->setFlag(!this->A, Flags::ZERO);
 }
 
-//inline void MOS6502::
+/* instruction group 2 */
+inline void MOS6502::ASL(MOS6502::AddressMode addressMode, ...) {
+    
+}
+inline void MOS6502::ROL(MOS6502::AddressMode addressMode, ...) {
+    
+}
+inline void MOS6502::LSR(MOS6502::AddressMode addressMode, ...) {
+    
+}
+inline void MOS6502::ROR(MOS6502::AddressMode addressMode, ...) {
+    
+}
+inline void MOS6502::STX(MOS6502::AddressMode addressMode, ...) {
+    
+}
+inline void MOS6502::LDX(MOS6502::AddressMode addressMode, ...) {
+    
+}
+inline void MOS6502::DEC(MOS6502::AddressMode addressMode, ...) {
+    
+}
+inline void MOS6502::INC(MOS6502::AddressMode addressMode, ...) {
+    
+}
 
 void MOS6502::step() {
     do {
@@ -717,6 +741,29 @@ void MOS6502::cycle() {
             //break;
         }
         break;
+    case 0b10:
+        switch (addressMode) {  // address mode
+        case 0b000: // immediate
+            switch (this->counter) {
+            case 1:
+                break;
+            case 2:
+                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->counter = 0;
+                break;
+            }
+            break;
+        case 0b001: // zero page
+            break;
+        case 0b010: // accumulator
+            break;
+        case 0b011: // absolute
+            break;
+        case 0b101: // zero page, x
+            break;
+        case 0b111: // absolute, x
+            break;
+        }
     default:
         exit(0);
     }
