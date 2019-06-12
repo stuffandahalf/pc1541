@@ -353,19 +353,16 @@ inline void MOS6502::ORA(MOS6502::AddressMode addressMode, ...) {
         var = (uint8_t)va_arg(args, uint);
         break;
     case AddressMode::ZERO_PAGE:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
     case AddressMode::ZERO_PAGE_X:
-        break;
     case AddressMode::ABSOLUTE:
+    case AddressMode::INDIRECT_INDEXED:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     case AddressMode::ABSOLUTE_X:
         break;
     case AddressMode::ABSOLUTE_Y:
         break;
     case AddressMode::INDEXED_INDIRECT:
-        break;
-    case AddressMode::INDIRECT_INDEXED:
         break;
     }
     
@@ -386,19 +383,16 @@ inline void MOS6502::AND(MOS6502::AddressMode addressMode, ...) {
         var = (uint8_t)va_arg(args, uint);
         break;
     case AddressMode::ZERO_PAGE:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
     case AddressMode::ZERO_PAGE_X:
-        break;
     case AddressMode::ABSOLUTE:
+    case AddressMode::INDIRECT_INDEXED:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     case AddressMode::ABSOLUTE_X:
         break;
     case AddressMode::ABSOLUTE_Y:
         break;
     case AddressMode::INDEXED_INDIRECT:
-        break;
-    case AddressMode::INDIRECT_INDEXED:
         break;
     }
     
@@ -419,19 +413,17 @@ inline void MOS6502::EOR(MOS6502::AddressMode addressMode, ...) {
         var = (uint8_t)va_arg(args, uint);
         break;
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ZERO_PAGE_X:
+    case AddressMode::ABSOLUTE:
+    case AddressMode::INDIRECT_INDEXED:
         var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
-    case AddressMode::ZERO_PAGE_X:
-        break;
-    case AddressMode::ABSOLUTE:
         break;
     case AddressMode::ABSOLUTE_X:
         break;
     case AddressMode::ABSOLUTE_Y:
         break;
     case AddressMode::INDEXED_INDIRECT:
-        break;
-    case AddressMode::INDIRECT_INDEXED:
         break;
     }
     
@@ -452,17 +444,16 @@ inline void MOS6502::ADC(MOS6502::AddressMode addressMode, ...) {
         var = (uint8_t)va_arg(args, uint);
         break;
     case AddressMode::ZERO_PAGE:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
+    case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
+    case AddressMode::INDIRECT_INDEXED:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     case AddressMode::ABSOLUTE_X:
         break;
     case AddressMode::ABSOLUTE_Y:
         break;
     case AddressMode::INDEXED_INDIRECT:
-        break;
-    case AddressMode::INDIRECT_INDEXED:
         break;
     }
     
@@ -482,19 +473,17 @@ inline void MOS6502::STA(MOS6502::AddressMode addressMode, ...) {
     
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ZERO_PAGE_X:
+    case AddressMode::ABSOLUTE:
+    case AddressMode::INDIRECT_INDEXED:
         targetAddr = (uint16_t)va_arg(args, uint);
         break;
-    case AddressMode::ZERO_PAGE_X:
-        break;
-    case AddressMode::ABSOLUTE:
         break;
     case AddressMode::ABSOLUTE_X:
         break;
     case AddressMode::ABSOLUTE_Y:
         break;
     case AddressMode::INDEXED_INDIRECT:
-        break;
-    case AddressMode::INDIRECT_INDEXED:
         break;
     }
     
@@ -513,17 +502,16 @@ inline void MOS6502::LDA(MOS6502::AddressMode addressMode, ...) {
         var = (uint8_t)va_arg(args, uint);
         break;
     case AddressMode::ZERO_PAGE:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
+    case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
+    case AddressMode::INDIRECT_INDEXED:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     case AddressMode::ABSOLUTE_X:
         break;
     case AddressMode::ABSOLUTE_Y:
         break;
     case AddressMode::INDEXED_INDIRECT:
-        break;
-    case AddressMode::INDIRECT_INDEXED:
         break;
     }
     
@@ -544,17 +532,16 @@ inline void MOS6502::CMP(MOS6502::AddressMode addressMode, ...) {
         var = (uint8_t)va_arg(args, uint);
         break;
     case AddressMode::ZERO_PAGE:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
+    case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
+    case AddressMode::INDIRECT_INDEXED:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     case AddressMode::ABSOLUTE_X:
         break;
     case AddressMode::ABSOLUTE_Y:
         break;
     case AddressMode::INDEXED_INDIRECT:
-        break;
-    case AddressMode::INDIRECT_INDEXED:
         break;
     }
     
@@ -575,17 +562,16 @@ inline void MOS6502::SBC(MOS6502::AddressMode addressMode, ...) {
         var = (uint8_t)va_arg(args, uint);
         break;
     case AddressMode::ZERO_PAGE:
-        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
-        break;
+    case AddressMode::ZERO_PAGE_X:
     case AddressMode::ABSOLUTE:
+    case AddressMode::INDIRECT_INDEXED:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
     case AddressMode::ABSOLUTE_X:
         break;
     case AddressMode::ABSOLUTE_Y:
         break;
     case AddressMode::INDEXED_INDIRECT:
-        break;
-    case AddressMode::INDIRECT_INDEXED:
         break;
     }
     
@@ -608,92 +594,156 @@ void MOS6502::step() {
 
 void MOS6502::cycle() {
     static uint8_t tmp[3] = { 0 };  // temporary data used between cycles
-    static Instruction *currentInstruction = &(instructions[this->IR >> 4][this->IR & 0x0F]);
+    //static Instruction *currentInstruction = &(instructions[this->IR >> 4][this->IR & 0x0F]);
     
-    /*if (this->counter == currentInstruction->cycles) {
-        this->IR = this->addrSpace.r8(PC.W++);
-        printf("Current opcode: %X\n", this->IR);
-        currentInstruction = &(instructions[this->IR >> 4][this->IR & 0x0F]);
-        //this->counter = i->cycles;
-        this->counter = 0;
-        std::cout << currentInstruction->mnemonic << std::endl;
-    }
-    else {*/
-        switch (this->IR & 0x2) {   // instruction group
-        case 0b01:
-            switch ((this->IR & 0x1C) >> 2) {   // address mode
-            case 0b000: // (zero page/indirect, X)
-                switch (this->counter) {
-                case 1:
-                    tmp[0] = this->addrSpace.r8(this->PC.W++);
-                    break;
-                case 2:
-                    tmp[0] += this->X;
-                    break;
-                case 3:
-                    tmp[1] = this->addrSpace.r8(tmp[0]);                    // address low
-                    break;
-                case 4:
-                    tmp[2] = this->addrSpace.r8((tmp[0] + 1) & 0xFF);       // address high
-                    break;
-                case 5:
-                    // Forgive me father for I have sinned
-                    (this->*(this->operations[1][(this->IR & 0xE0) >> 5]))(AddressMode::INDEXED_INDIRECT, (tmp[2] << 8) + tmp[1]);
-                    break;
-                case 6:
-                    this->IR = this->addrSpace.r8(this->PC.W++);
-                    this->counter = 0;
-                    break;
-                }
+    this->counter++;
+    
+    uint8_t instructionGroup = 0;
+    uint8_t addressMode = 0;
+    uint8_t instruction = 0;
+    
+    instructionGroup = this->IR & 0x2;
+    addressMode = (this->IR & 0x1C) >> 2;
+    instruction = (this->IR & 0xE0) >> 5;
+    
+    switch (instructionGroup) {   // instruction group
+    case 0b01:
+        switch (addressMode) {   // address mode
+        case 0b000: // (zero page/indirect, X)
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
                 break;
-            case 0b001: // zero page
-                switch (this->counter) {
-                case 1:
-                    tmp[0] = this->addrSpace.r8(this->PC.W++);
-                    break;
-                case 2:
-                    (this->*(this->operations[1][(this->IR & 0xE0) >> 5]))(AddressMode::ZERO_PAGE, tmp[0]);
-                    break;
-                case 3:
-                    this->IR = this->addrSpace.r8(this->PC.W++);
-                    this->counter = 0;
-                    break;
-                }
+            case 2:
+                tmp[0] += this->X;
                 break;
-            case 0b010: // immediate
-                switch (this->counter) {
-                case 1:
-                    tmp[0] = this->addrSpace.r8(this->PC.W++);
-                    (this->*(this->operations[1][(this->IR & 0xE0) >> 5]))(AddressMode::IMMEDIATE, tmp[0]);
-                    break;
-                case 2:
-                    this->IR = this->addrSpace.r8(this->PC.W++);
-                    this->counter = 0;
-                }
+            case 3:
+                tmp[1] = this->addrSpace.r8(tmp[0]);                    // address low
                 break;
-            case 0b011: // absolute
-                switch (this->counter) {
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                    this->IR = this->addrSpace.r8(this->PC.W++);
-                    this->counter = 0;
-                }
+            case 4:
+                tmp[2] = this->addrSpace.r8((tmp[0] + 1) & 0xFF);       // address high
                 break;
-            case 0b100: // (zero page), Y
+            case 5:
+                // Forgive me father for I have sinned
+                (this->*(this->operations[instructionGroup][instruction]))(AddressMode::INDEXED_INDIRECT, (tmp[2] << 8) + tmp[1]);
                 break;
-            case 0b101: // zero page, X
-                break;
-            case 0b110: // absolute, Y
-                break;
-            case 0b111: // absolute, X
+            case 6:
+                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->counter = 0;
                 break;
             }
             break;
-        default:
-            exit(0);
+        case 0b001: // zero page
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 2:
+                (this->*(this->operations[1][instruction]))(AddressMode::ZERO_PAGE, tmp[0]);
+                break;
+            case 3:
+                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->counter = 0;
+                break;
+            }
+            break;
+        case 0b010: // immediate
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                (this->*(this->operations[instructionGroup][instruction]))(AddressMode::IMMEDIATE, tmp[0]);
+                break;
+            case 2:
+                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->counter = 0;
+            }
+            break;
+        case 0b011: // absolute
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);  // address low
+                break;
+            case 2:
+                tmp[1] = this->addrSpace.r8(this->PC.W++);  // address high
+                break;
+            case 3:
+                (this->*(this->operations[instructionGroup][instruction]))(AddressMode::IMMEDIATE, (tmp[1] << 8) + tmp[0]);
+                break;
+            case 4:
+                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->counter = 0;
+                break;
+            }
+            break;
+        case 0b100: // (zero page), Y
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);  // zero page ptr
+                break;
+            case 2:
+                tmp[1] = this->addrSpace.r8(tmp[0]);        // target address low
+                break;
+            case 3:
+                tmp[2] = this->addrSpace.r8(tmp[0] + 1);    // target address high
+                break;
+            case 4:
+                if (((tmp[2] << 8) + tmp[1] + this->Y) & 0xFF != (tmp[1] + this->Y)) {
+                    break;
+                }
+                this->counter++;
+            case 5:
+                (this->*(this->operations[instructionGroup][instruction]))(AddressMode::INDIRECT_INDEXED, (uint16_t)((tmp[2] << 8) + tmp[1] + this->Y));
+                break;
+            case 6:
+                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->counter = 0;
+                break;
+            }
+            break;
+        case 0b101: // zero page, X
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);  // zero page address
+                break;
+            case 2:
+                tmp[0] += this->X;
+            case 3:
+                (this->*(this->operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE_X, tmp[0]);
+            case 4:
+                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->counter = 0;
+                break;
+            }
+            break;
+        case 0b110: // absolute, Y
+        case 0b111: // absolute, X
+            tmp[2] = (addressMode & 1) ? this->X : this->Y; // set index register
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);  // address low
+                break;
+            case 2:
+                tmp[1] = this->addrSpace.r8(this->PC.W++);  // address high
+            case 3:
+                if (((uint16_t)tmp[0] + tmp[2]) & 0xFF00) {
+                    break;
+                }
+                this->counter++;
+            case 4:
+                (this->*(this->operations[instructionGroup][instruction]))((instruction & 1) ? AddressMode::ABSOLUTE_X : AddressMode::ABSOLUTE_Y, (tmp[1] << 8) + tmp[0] + tmp[2]);
+            case 5:
+                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->counter = 0;
+                break;
+            }
+            break;
+        //case 0b111: // absolute, X
+            //break;
         }
+        break;
+    default:
+        exit(0);
+    }
         
         /*switch (this->IR & 0x1F) {
         case 0x00:  // implied / immediate
@@ -1407,7 +1457,6 @@ void MOS6502::cycle() {
         }
     }*/
     
-    this->counter++;
     this->cycles++;
 }
 
