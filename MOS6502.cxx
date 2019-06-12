@@ -1,6 +1,8 @@
 #include "MOS6502.h"
 #include <cstdio>
+#include <cstdarg>
 
+typedef unsigned int uint;
 typedef Instruction i_t;
 static Instruction instructions[16][16] = {
     { // 0x0*
@@ -305,6 +307,26 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     
     this->counter = 0;
     this->cycles = 0;
+    
+    /*this->operations[4][8] = {
+        { nullptr },
+        { MOS6502::ORA },
+        { nullptr },
+        { nullptr }
+    }*/
+    
+    operation_t ops[4][8] = {
+        { nullptr },
+        { &MOS6502::ORA, &MOS6502::AND, &MOS6502::EOR, &MOS6502::ADC, &MOS6502::STA, &MOS6502::LDA, &MOS6502::CMP, &MOS6502::SBC },
+        { nullptr },
+        { nullptr }
+    };
+    
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 8; j++) {
+            this->operations[i][j] = ops[i][j];
+        }
+    }
 }
 
 void MOS6502::reset() {
@@ -315,7 +337,268 @@ void MOS6502::reset() {
     this->PC.W = start;
     
     this->P |= (uint8_t)Flags::IRQ;
+    
+    this->IR = this->addrSpace.r8(this->PC.W++);
 }
+
+
+inline void MOS6502::ORA(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
+    
+    uint8_t var = 0;
+    
+    switch (addressMode) {
+    case AddressMode::IMMEDIATE:
+        var = (uint8_t)va_arg(args, uint);
+        break;
+    case AddressMode::ZERO_PAGE:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
+        break;
+    case AddressMode::ZERO_PAGE_X:
+        break;
+    case AddressMode::ABSOLUTE:
+        break;
+    case AddressMode::ABSOLUTE_X:
+        break;
+    case AddressMode::ABSOLUTE_Y:
+        break;
+    case AddressMode::INDEXED_INDIRECT:
+        break;
+    case AddressMode::INDIRECT_INDEXED:
+        break;
+    }
+    
+    va_end(args);
+    
+    this->A |= var;
+    this->setFlag(!this->A, Flags::ZERO);
+    this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+}
+inline void MOS6502::AND(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
+    
+    uint8_t var = 0;
+    
+    switch (addressMode) {
+    case AddressMode::IMMEDIATE:
+        var = (uint8_t)va_arg(args, uint);
+        break;
+    case AddressMode::ZERO_PAGE:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
+        break;
+    case AddressMode::ZERO_PAGE_X:
+        break;
+    case AddressMode::ABSOLUTE:
+        break;
+    case AddressMode::ABSOLUTE_X:
+        break;
+    case AddressMode::ABSOLUTE_Y:
+        break;
+    case AddressMode::INDEXED_INDIRECT:
+        break;
+    case AddressMode::INDIRECT_INDEXED:
+        break;
+    }
+    
+    va_end(args);
+    
+    this->A &= var;
+    this->setFlag(!this->A, Flags::ZERO);
+    this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+}
+inline void MOS6502::EOR(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
+    
+    uint8_t var = 0;
+    
+    switch (addressMode) {
+    case AddressMode::IMMEDIATE:
+        var = (uint8_t)va_arg(args, uint);
+        break;
+    case AddressMode::ZERO_PAGE:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
+        break;
+    case AddressMode::ZERO_PAGE_X:
+        break;
+    case AddressMode::ABSOLUTE:
+        break;
+    case AddressMode::ABSOLUTE_X:
+        break;
+    case AddressMode::ABSOLUTE_Y:
+        break;
+    case AddressMode::INDEXED_INDIRECT:
+        break;
+    case AddressMode::INDIRECT_INDEXED:
+        break;
+    }
+    
+    va_end(args);
+    
+    this->A ^= var;
+    this->setFlag(!this->A, Flags::ZERO);
+    this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+}
+inline void MOS6502::ADC(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
+    
+    uint8_t var = 0;
+    
+    switch (addressMode) {
+    case AddressMode::IMMEDIATE:
+        var = (uint8_t)va_arg(args, uint);
+        break;
+    case AddressMode::ZERO_PAGE:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
+        break;
+    case AddressMode::ABSOLUTE:
+        break;
+    case AddressMode::ABSOLUTE_X:
+        break;
+    case AddressMode::ABSOLUTE_Y:
+        break;
+    case AddressMode::INDEXED_INDIRECT:
+        break;
+    case AddressMode::INDIRECT_INDEXED:
+        break;
+    }
+    
+    va_end(args);
+    
+    uint16_t result = (uint16_t)this->A + var;
+    this->A = (uint8_t)result;
+    this->setFlag(!this->A, Flags::ZERO);
+    this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+    this->setFlag(result & 0xFF00, Flags::OVERFLOW);
+}
+inline void MOS6502::STA(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
+    
+    uint16_t targetAddr = 0;
+    
+    switch (addressMode) {
+    case AddressMode::ZERO_PAGE:
+        targetAddr = (uint16_t)va_arg(args, uint);
+        break;
+    case AddressMode::ZERO_PAGE_X:
+        break;
+    case AddressMode::ABSOLUTE:
+        break;
+    case AddressMode::ABSOLUTE_X:
+        break;
+    case AddressMode::ABSOLUTE_Y:
+        break;
+    case AddressMode::INDEXED_INDIRECT:
+        break;
+    case AddressMode::INDIRECT_INDEXED:
+        break;
+    }
+    
+    va_end(args);
+    
+    this->addrSpace.w8(targetAddr, this->A);
+}
+inline void MOS6502::LDA(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
+    
+    uint8_t var = 0;
+    
+    switch (addressMode) {
+    case AddressMode::IMMEDIATE:
+        var = (uint8_t)va_arg(args, uint);
+        break;
+    case AddressMode::ZERO_PAGE:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
+        break;
+    case AddressMode::ABSOLUTE:
+        break;
+    case AddressMode::ABSOLUTE_X:
+        break;
+    case AddressMode::ABSOLUTE_Y:
+        break;
+    case AddressMode::INDEXED_INDIRECT:
+        break;
+    case AddressMode::INDIRECT_INDEXED:
+        break;
+    }
+    
+    va_end(args);
+    
+    this->A = var;
+    this->setFlag(!this->A, Flags::ZERO);
+    this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+}
+inline void MOS6502::CMP(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
+    
+    uint8_t var = 0;
+    
+    switch (addressMode) {
+    case AddressMode::IMMEDIATE:
+        var = (uint8_t)va_arg(args, uint);
+        break;
+    case AddressMode::ZERO_PAGE:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
+        break;
+    case AddressMode::ABSOLUTE:
+        break;
+    case AddressMode::ABSOLUTE_X:
+        break;
+    case AddressMode::ABSOLUTE_Y:
+        break;
+    case AddressMode::INDEXED_INDIRECT:
+        break;
+    case AddressMode::INDIRECT_INDEXED:
+        break;
+    }
+    
+    va_end(args);
+    
+    this->setFlag(this->A == var, Flags::ZERO);
+    this->setFlag(this->A >= var, Flags::CARRY);
+    this->setFlag((this->A - var) & 0x80, Flags::NEGATIVE);
+}
+inline void MOS6502::SBC(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
+    
+    uint8_t var = 0;
+    
+    switch (addressMode) {
+    case AddressMode::IMMEDIATE:
+        var = (uint8_t)va_arg(args, uint);
+        break;
+    case AddressMode::ZERO_PAGE:
+        var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
+        break;
+    case AddressMode::ABSOLUTE:
+        break;
+    case AddressMode::ABSOLUTE_X:
+        break;
+    case AddressMode::ABSOLUTE_Y:
+        break;
+    case AddressMode::INDEXED_INDIRECT:
+        break;
+    case AddressMode::INDIRECT_INDEXED:
+        break;
+    }
+    
+    va_end(args);
+    
+    int16_t correctResult = this->A - var - (1 - this->checkFlag(Flags::CARRY));
+    this->A = correctResult & 0xFF;
+    this->setFlag(this->A != correctResult, Flags::CARRY);
+    this->setFlag(this->A != correctResult, Flags::OVERFLOW);
+    this->setFlag(!this->A, Flags::ZERO);
+}
+
+//inline void MOS6502::
 
 void MOS6502::step() {
     do {
@@ -325,620 +608,806 @@ void MOS6502::step() {
 
 void MOS6502::cycle() {
     static uint8_t tmp[3] = { 0 };  // temporary data used between cycles
+    static Instruction *currentInstruction = &(instructions[this->IR >> 4][this->IR & 0x0F]);
     
-    if (this->counter == 0) {
+    /*if (this->counter == currentInstruction->cycles) {
         this->IR = this->addrSpace.r8(PC.W++);
         printf("Current opcode: %X\n", this->IR);
-        Instruction *i = &(instructions[this->IR >> 4][this->IR & 0x0F]);
-        this->counter = i->cycles;
-        std::cout << i->mnemonic << std::endl;
+        currentInstruction = &(instructions[this->IR >> 4][this->IR & 0x0F]);
+        //this->counter = i->cycles;
+        this->counter = 0;
+        std::cout << currentInstruction->mnemonic << std::endl;
     }
-    else {
-        switch (this->IR) {
-        case 0x00:  // BRK
-            switch (this->counter) {
-            case 6:
-                // dummy read
-                this->PC.W++;
-                break;
-            case 5:
-                this->setFlag(true, Flags::BREAK);
-                this->setFlag(true, Flags::IRQ);
-                this->addrSpace.w8(0x100 | this->SP--, this->PC.B.h);
-                break;
-            case 4:
-                this->addrSpace.w8(0x100 | this->SP--, this->PC.B.l);
-                break;
-            case 3:
-                this->addrSpace.w8(0x100 | this->SP--, this->P);
-                break;
-            case 2:
-                this->PC.B.l = this->addrSpace.r8((uint16_t)Vectors::BRK);      // target addr low
-                break;
-            case 1:
-                this->PC.B.h = this->addrSpace.r8((uint16_t)Vectors::BRK + 1);  // target addr high
-            }
-            break;
-        case 0x01:  // ORA, indexed, indirect, X
-            switch (this->counter) {
-            case 5:
-                tmp[0] = this->addrSpace.r8(PC.W++) + this->X;
-                break;
-            case 4:
-                tmp[1] = this->addrSpace.r8(tmp[0]);        // effective address low
-                break;
-            case 3:
-                tmp[2] = this->addrSpace.r8(tmp[0] + 1);    // effective address high
-                break;
-            case 2:
-                this->A |= this->addrSpace.r8((tmp[2] << 8) + tmp[1]);
-                break;
-            case 1:
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
-        case 0x05:  // ORA, zero page
-            switch (this->counter) {
-            case 2:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 1:
-                this->A |= this->addrSpace.r8(tmp[0]);
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
-        case 0x06:  // ASL, zero page
-            switch (this->counter) {
-            case 4:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);  // zero page address
-                break;
-            case 3:
-                tmp[1] = this->addrSpace.r8(tmp[0]);    // original value
-                tmp[2] = tmp[1] << 1;                   // updated value
-                break;
-            case 2:
-                this->addrSpace.w8(tmp[0], tmp[1]);
-                break;
-            case 1:
-                this->addrSpace.w8(tmp[0], tmp[2]);
-                this->setFlag(!tmp[2], Flags::ZERO);
-                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
-                this->setFlag(tmp[1] & 0x80, Flags::CARRY);
-                break;
-            }
-            break;
-        case 0x08:  // PHP
-            switch (this->counter) {
-            case 2:
-                // dummy cycle
-                break;
-            case 1:
-                this->addrSpace.w8(0x100 | this->SP, this->P); 
-                this->SP--;
-                break;
-            }
-            break;
-        case 0x09:  // ORA, immediate
-            switch (this->counter) {
-            case 1:
-                this->A |= this->addrSpace.r8(this->PC.W++);
-                
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
-        case 0x0A:  // ASL, accum
-            switch (this->counter) {
-            case 1:
-                this->setFlag(this->A & 0x80, Flags::CARRY);
-                
-                this->A <<= 1;
-                
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
-        case 0x0D:  // ORA, absolute
-            switch (this->counter) {
-            case 3:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);  // target address low
-                break;
-            case 2:
-                tmp[1] = this->addrSpace.r8(this->PC.W++);  // target address high
-                break;
-            case 1:
-                this->A |= this->addrSpace.r8((tmp[1] << 8) + tmp[0]);
-            
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
-        case 0x0E:  // ASL, absolute
-            switch (this->counter) {
-            case 5:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);     // target address low
-                break;
-            case 4:
-                tmp[1] = this->addrSpace.r8(this->PC.W++);     // target address high
-                break;
-            case 3:
-                tmp[2] = this->addrSpace.r8((tmp[1] << 8) + tmp[0]);
-                break;
-            case 2:
-                //this->addrSpace.w8(tmp[2], (tmp[1] << 8) + tmp[0]); // dummy write, might not need?
-            
-                this->setFlag(tmp[2] & 0x80, Flags::CARRY);
-                
-                tmp[2] <<= 1;
-                
-                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
-                this->setFlag(!tmp[2], Flags::ZERO);
-                break;
-            case 1:
-                this->addrSpace.w8((tmp[1] << 8) + tmp[0], tmp[2]);
-                break;
-            }
-            break;
-        
-        case 0x10:  // BPL, relative
-            switch (this->counter) {
-            case 1:
-                switch (tmp[1]) {
-                case 0:
-                    tmp[0] = this->addrSpace.r8(this->PC.W);                // branch offset
-                    //uint16_t target = this->PC.W + (int8_t)tmp[0];          // branch target
-                    tmp[1] = (this->PC.W / 256 == (this->PC.W + (int8_t)tmp[0]) / 256) ? 1 : 2;    // extra cycles
-                    //this->counter += tmp[1];
-                    this->counter++;
-                    this->PC.W++;
+    else {*/
+        switch (this->IR & 0x2) {   // instruction group
+        case 0b01:
+            switch ((this->IR & 0x1C) >> 2) {   // address mode
+            case 0b000: // (zero page/indirect, X)
+                switch (this->counter) {
+                case 1:
+                    tmp[0] = this->addrSpace.r8(this->PC.W++);
                     break;
                 case 2:
-                    tmp[1]--;
-                    this->counter++;
+                    tmp[0] += this->X;
                     break;
-                case 1:
-                    //this->PC.W = this->PC.W
-                    if (this->P & (uint8_t)Flags::NEGATIVE) {
-                        this->PC.W++;
-                    }
-                    else {
-                        this->PC.W += (int8_t)tmp[0];
-                    }
-                    break;
-                }
-                break;
-            }
-            break;
-        case 0x11:  // ORA, indirect, indexed, Y
-            switch (this->counter) {
-            case 4:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 3:
-                tmp[1] = this->addrSpace.r8(tmp[0]) + this->Y;  // effective address low
-                break;
-            case 2:
-                tmp[2] = ((uint16_t)this->addrSpace.r8(tmp[0]) + this->Y) >> 8; // carry
-                if (tmp[2]) {
-                    this->counter = 5;
-                }
-                tmp[2] += this->addrSpace.r8(tmp[0] + 1);       // effective address high
-                break;
-            case 1:
-                this->A |= this->addrSpace.r8((tmp[2] << 8) + tmp[1]);
-            
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                break;
-            case 5:
-                this->counter = 1;
-                break;
-            }
-            break;
-        case 0x15:  // ORA, zero page, X
-            switch (this->counter) {
-            case 3:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 2:
-                tmp[0] += this->X;
-                break;
-            case 1:
-                this->A |= this->addrSpace.r8(tmp[0]);
-                
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
-        case 0x16:  // ASL, zero page, X
-            switch (this->counter) {
-            case 5:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 4:
-                tmp[0] += this->X;
-                break;
-            case 3:
-                tmp[1] = this->addrSpace.r8(tmp[0]);
-                break;
-            case 2:
-                this->setFlag(tmp[1] & 0x80, Flags::CARRY);
-                tmp[1] <<= 1;
-                break;
-            case 1:
-                this->addrSpace.w8(tmp[0], tmp[1]);
-                
-                this->setFlag(!tmp[1], Flags::ZERO);
-                this->setFlag(tmp[1] & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
-        case 0x18:  // CLC
-            switch (this->counter) {
-            case 1:
-                this->setFlag(false, Flags::CARRY);
-            }
-            break;
-        case 0x19:  // ORA, absolute, Y
-            switch (this->counter) {
                 case 3:
-                    tmp[0] = this->addrSpace.r8(this->PC.W++);  // address low
-                    break;
-                case 2:
-                    tmp[1] = this->addrSpace.r8(this->PC.W++);  // address high
-                    tmp[2] = tmp[0] + this->Y;
-                    break;
-                case 1:
-                    if (tmp[1] != (((uint16_t)tmp[0] + this->Y) >> 8)) {
-                        this->counter = 5; // decremented to 4
-                    }
-                    else {
-                        this->A |= this->addrSpace.r8((tmp[1] << 8) + tmp[2]);
-                        this->setFlag(!this->A, Flags::ZERO);
-                        this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                    }
+                    tmp[1] = this->addrSpace.r8(tmp[0]);                    // address low
                     break;
                 case 4:
-                    tmp[1] = ((uint16_t)tmp[0] + this->Y) >> 8;
-                    this->A |= this->addrSpace.r8((tmp[1] << 8) + tmp[2]);
-                    this->setFlag(!this->A, Flags::ZERO);
-                    this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                    tmp[2] = this->addrSpace.r8((tmp[0] + 1) & 0xFF);       // address high
+                    break;
+                case 5:
+                    // Forgive me father for I have sinned
+                    (this->*(this->operations[1][(this->IR & 0xE0) >> 5]))(AddressMode::INDEXED_INDIRECT, (tmp[2] << 8) + tmp[1]);
+                    break;
+                case 6:
+                    this->IR = this->addrSpace.r8(this->PC.W++);
+                    this->counter = 0;
+                    break;
+                }
+                break;
+            case 0b001: // zero page
+                switch (this->counter) {
+                case 1:
+                    tmp[0] = this->addrSpace.r8(this->PC.W++);
+                    break;
+                case 2:
+                    (this->*(this->operations[1][(this->IR & 0xE0) >> 5]))(AddressMode::ZERO_PAGE, tmp[0]);
+                    break;
+                case 3:
+                    this->IR = this->addrSpace.r8(this->PC.W++);
+                    this->counter = 0;
+                    break;
+                }
+                break;
+            case 0b010: // immediate
+                switch (this->counter) {
+                case 1:
+                    tmp[0] = this->addrSpace.r8(this->PC.W++);
+                    (this->*(this->operations[1][(this->IR & 0xE0) >> 5]))(AddressMode::IMMEDIATE, tmp[0]);
+                    break;
+                case 2:
+                    this->IR = this->addrSpace.r8(this->PC.W++);
+                    this->counter = 0;
+                }
+                break;
+            case 0b011: // absolute
+                switch (this->counter) {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    this->IR = this->addrSpace.r8(this->PC.W++);
+                    this->counter = 0;
+                }
+                break;
+            case 0b100: // (zero page), Y
+                break;
+            case 0b101: // zero page, X
+                break;
+            case 0b110: // absolute, Y
+                break;
+            case 0b111: // absolute, X
+                break;
             }
             break;
+        default:
+            exit(0);
+        }
+        
+        /*switch (this->IR & 0x1F) {
+        case 0x00:  // implied / immediate
+        case 0x02:
+        case 0x08:
+        case 0x09:
+        case 0x0B:
+        case 0x18:
+        case 0x1A:
+            std::cout << "Implied / Immediate" << std::endl;
+            break;
             
-        case 0x4C:  // JMP, absolute
+        case 0x01:  // (indirect,X)
+        case 0x03:
+            std::cout << "(Indirect, X)" << std::endl;
+            break;
+            
+        case 0x04:  // Zero page
+        case 0x05:
+        case 0x06:
+        //case 0x07:    // Invalid?
+            std::cout << "Zero page" << std::endl;
             switch (this->counter) {
+            case 0:
+                tmp[0] = 
+                break;
+            case 1:
+                break;
             case 2:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
                 break;
-            case 1:
-                this->PC.B.h = this->addrSpace.r8(this->PC.W);
-                this->PC.B.l = tmp[0];
-                break;
-            }
-            break;
-            
-        case 0x78:  // SEI
-            switch (this->counter) {
-            case 1:
-                this->setFlag(true, Flags::IRQ);
-            }
-            break;
-            
-        case 0x85:  // STA, zero page
-            switch (this->counter) {
-            case 2:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 1:
-                this->addrSpace.w8(tmp[0], this->A);
-                break;
-            }
-            break;
-        case 0x86:  // STX, zero page
-            switch (this->counter) {
-            case 2:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 1:
-                this->addrSpace.w8(tmp[0], this->X);
-                break;
-            }
-            break;
-            
-        case 0x8A:  // TXA
-            switch (this->counter) {
-            case 1:
-                this->A = this->X;
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
-            
-        case 0x8E:  // STX, absolute
-            switch (this->counter) {
             case 3:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
                 break;
-            case 2:
-                tmp[1] = this->addrSpace.r8(this->PC.W++);
+            case 4:
                 break;
-            case 1:
-#ifdef DEBUG
-                addrout((tmp[1] << 8) + tmp[0]);
-#endif
-                this->addrSpace.w8((tmp[1] << 8) + tmp[0], this->X);
+            case 5:
                 break;
             }
+            
             break;
             
-        case 0x8D:  // STA, absolute
-            switch (this->counter) {
-            case 3:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);  // target address low
-                break;
-            case 2:
-                tmp[1] = this->addrSpace.r8(this->PC.W++);  // target address high
-                break;
-            case 1:
-#ifdef DEBUG
-                addrout((tmp[1] << 8) + tmp[0]);
-#endif
-                this->addrSpace.w8((tmp[1] << 8) + tmp[0], this->A);
-                break;
-            }
-            break;
-            
-        case 0x94:  // STY, zero page, indexed X
-            switch (this->counter) {
-            case 3:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 2:
-                tmp[1] = tmp[0] + this->X;
-#ifdef DEBUG
-                addrout((int)tmp[1]);
-#endif
-                break;
-            case 1:
-                this->addrSpace.w8(tmp[1], this->Y);
-                break;
-            }
-            break;
-        case 0x95:  // STA, zero page, indexed X
-            switch (this->counter) {
-            case 3:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 2:
-                //tmp[1] = this->addrSpace.r8((uint8_t)(tmp[0] + this->X));
-                // dummy read
-                break;
-            case 1:
-#ifdef DEBUG
-                addrout(tmp[0] + this->X);
-#endif
-                this->addrSpace.w8((uint8_t)(tmp[0] + this->X), this->A);
-                break;
-            }
-            break;
-            
-        case 0xA0:  // LDY, immediate
-            switch (this->counter) {
-            case 1:
-#ifdef DEBUG
-                addrout(this->PC.W);
-#endif
-                this->Y = this->addrSpace.r8(this->PC.W++);
-                this->setFlag(!this->Y, Flags::ZERO);
-                this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
-            }
+        case 0x0A:  // Accumulator / implied
+            std::cout << "Accumulator / Implied" << std::endl;
             break;
         
-        case 0xA2:  // LDX, immediate
-            switch (this->counter) {
-            case 1:
-#ifdef DEBUG
-                addrout(this->PC.W);
-#endif
-                this->X = this->addrSpace.r8(this->PC.W++);
-                this->setFlag(!this->X, Flags::ZERO);
-                break;
-            }
+        case 0x0C:  // Absolute
+        case 0x0D:
+        case 0x0E:
+        case 0x0F:
+            std::cout << "Absolute" << std::endl;
             break;
             
-        case 0xA8:  // TAY
-            switch (this->counter) {
-            case 1:
-                this->Y = this->A;
-                this->setFlag(!this->Y, Flags::ZERO);
-                this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
-                break;
-            }
+        case 0x10:  // Relative
+            std::cout << "Relative" << std::endl;
             break;
-        case 0xA9:  // LDA, immediate
-            switch (this->counter) {
-            case 1:
-#ifdef DEBUG
-                addrout(this->PC.W);
-#endif
-                this->A = this->addrSpace.r8(this->PC.W++);
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-            }
+        
+        case 0x11:  // (indirect, Y)
+        case 0x13:
+            std::cout << "(Indirect), Y" << std::endl;
+            break;
+        
+        case 0x14:  // Zero page, X
+        case 0x15:
+        case 0x16:
+        case 0x17:
+            std::cout << "Zero page, X" << std::endl;
             break;
             
-        case 0xB5:  // LDA, zero page, indexed X
-            switch (this->counter) {
-            case 3:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 2:
-                tmp[1] = tmp[0] + this->X;
-#ifdef DEBUG
-                addrout((int)tmp[1]);
-#endif
-                break;
-            case 1:
-                this->A = this->addrSpace.r8(tmp[1]);
-                this->setFlag(!this->A, Flags::ZERO);
-                this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-                break;
-            }
+        case 0x19:  // Absolute, Y
+        case 0x1B:
+            std::cout << "Absolute, Y" << std::endl;
             break;
+        
+        case 0x1C:  // Absolute, X
+        case 0x1D:
+        case 0x1E:
+        case 0x1F:
+            std::cout << "Absolute, X" << std::endl;
+            break;*/
             
-        case 0xC6:  // DEC, zero page
-            switch (this->counter) {
-            case 4:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 3:
-                tmp[1] = this->addrSpace.r8(tmp[0]);
-                break;
-            case 2:
-                tmp[2] = tmp[1] - 1;
-                break;
-            case 1:
-                this->addrSpace.w8(tmp[0], tmp[2]);
-                this->setFlag(!tmp[2], Flags::ZERO);
-                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
+        //case 0x00:  // BRK
+            //switch (this->counter) {
+            //case 6:
+                //// dummy read
+                //this->PC.W++;
+                //break;
+            //case 5:
+                //this->setFlag(true, Flags::BREAK);
+                //this->setFlag(true, Flags::IRQ);
+                //this->addrSpace.w8(0x100 | this->SP--, this->PC.B.h);
+                //break;
+            //case 4:
+                //this->addrSpace.w8(0x100 | this->SP--, this->PC.B.l);
+                //break;
+            //case 3:
+                //this->addrSpace.w8(0x100 | this->SP--, this->P);
+                //break;
+            //case 2:
+                //this->PC.B.l = this->addrSpace.r8((uint16_t)Vectors::BRK);      // target addr low
+                //break;
+            //case 1:
+                //this->PC.B.h = this->addrSpace.r8((uint16_t)Vectors::BRK + 1);  // target addr high
+            //}
+            //break;
+        //case 0x01:  // ORA, indexed, indirect, X
+            //switch (this->counter) {
+            //case 5:
+                //tmp[0] = this->addrSpace.r8(PC.W++) + this->X;
+                //break;
+            //case 4:
+                //tmp[1] = this->addrSpace.r8(tmp[0]);        // effective address low
+                //break;
+            //case 3:
+                //tmp[2] = this->addrSpace.r8(tmp[0] + 1);    // effective address high
+                //break;
+            //case 2:
+                //this->A |= this->addrSpace.r8((tmp[2] << 8) + tmp[1]);
+                //break;
+            //case 1:
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+        //case 0x05:  // ORA, zero page
+            //switch (this->counter) {
+            //case 2:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 1:
+                //this->A |= this->addrSpace.r8(tmp[0]);
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+        //case 0x06:  // ASL, zero page
+            //switch (this->counter) {
+            //case 4:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);  // zero page address
+                //break;
+            //case 3:
+                //tmp[1] = this->addrSpace.r8(tmp[0]);    // original value
+                //tmp[2] = tmp[1] << 1;                   // updated value
+                //break;
+            //case 2:
+                //this->addrSpace.w8(tmp[0], tmp[1]);
+                //break;
+            //case 1:
+                //this->addrSpace.w8(tmp[0], tmp[2]);
+                //this->setFlag(!tmp[2], Flags::ZERO);
+                //this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
+                //this->setFlag(tmp[1] & 0x80, Flags::CARRY);
+                //break;
+            //}
+            //break;
+        //case 0x08:  // PHP
+            //switch (this->counter) {
+            //case 2:
+                //// dummy cycle
+                //break;
+            //case 1:
+                //this->addrSpace.w8(0x100 | this->SP, this->P); 
+                //this->SP--;
+                //break;
+            //}
+            //break;
+        //case 0x09:  // ORA, immediate
+            //switch (this->counter) {
+            //case 1:
+                //this->A |= this->addrSpace.r8(this->PC.W++);
+                
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+        //case 0x0A:  // ASL, accum
+            //switch (this->counter) {
+            //case 1:
+                //this->setFlag(this->A & 0x80, Flags::CARRY);
+                
+                //this->A <<= 1;
+                
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+        //case 0x0D:  // ORA, absolute
+            //switch (this->counter) {
+            //case 3:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);  // target address low
+                //break;
+            //case 2:
+                //tmp[1] = this->addrSpace.r8(this->PC.W++);  // target address high
+                //break;
+            //case 1:
+                //this->A |= this->addrSpace.r8((tmp[1] << 8) + tmp[0]);
             
-        case 0xC8:  // INY
-            switch (this->counter) {
-            case 1:
-                this->Y++;
-                this->setFlag(!this->Y, Flags::ZERO);
-                this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+        //case 0x0E:  // ASL, absolute
+            //switch (this->counter) {
+            //case 5:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);     // target address low
+                //break;
+            //case 4:
+                //tmp[1] = this->addrSpace.r8(this->PC.W++);     // target address high
+                //break;
+            //case 3:
+                //tmp[2] = this->addrSpace.r8((tmp[1] << 8) + tmp[0]);
+                //break;
+            //case 2:
+                ////this->addrSpace.w8(tmp[2], (tmp[1] << 8) + tmp[0]); // dummy write, might not need?
             
-        case 0xD0:  // BNE, relative
-            switch (this->counter) {
-            case 1:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-#ifdef DEBUG
-                std::cout << (int)(int8_t)tmp[0] << std::endl;
-#endif
-                this->counter = 3;  // decrements to 2
-                break;
-            case 2:
-                if (!this->checkFlag(Flags::ZERO)) {
-                    tmp[1] = this->PC.B.l;
-                    tmp[2] = this->PC.B.h;
-                    this->PC.B.l += (int8_t)tmp[0];
-                    if (tmp[2] != this->PC.B.h) {
-                        this->counter = 4;  // decrements to 3
-                        break;
-                    }
-                }
-                this->counter = 1;
-                break;
-            case 3:
-                this->PC.B.l = tmp[1];
-                this->PC.W += (int8_t)tmp[0];
-                this->counter = 1;
-                break;
-            }
-            break;
+                //this->setFlag(tmp[2] & 0x80, Flags::CARRY);
+                
+                //tmp[2] <<= 1;
+                
+                //this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
+                //this->setFlag(!tmp[2], Flags::ZERO);
+                //break;
+            //case 1:
+                //this->addrSpace.w8((tmp[1] << 8) + tmp[0], tmp[2]);
+                //break;
+            //}
+            //break;
+        
+        //case 0x10:  // BPL, relative
+            //switch (this->counter) {
+            //case 1:
+                //switch (tmp[1]) {
+                //case 0:
+                    //tmp[0] = this->addrSpace.r8(this->PC.W);                // branch offset
+                    ////uint16_t target = this->PC.W + (int8_t)tmp[0];          // branch target
+                    //tmp[1] = (this->PC.W / 256 == (this->PC.W + (int8_t)tmp[0]) / 256) ? 1 : 2;    // extra cycles
+                    ////this->counter += tmp[1];
+                    //this->counter++;
+                    //this->PC.W++;
+                    //break;
+                //case 2:
+                    //tmp[1]--;
+                    //this->counter++;
+                    //break;
+                //case 1:
+                    ////this->PC.W = this->PC.W
+                    //if (this->P & (uint8_t)Flags::NEGATIVE) {
+                        //this->PC.W++;
+                    //}
+                    //else {
+                        //this->PC.W += (int8_t)tmp[0];
+                    //}
+                    //break;
+                //}
+                //break;
+            //}
+            //break;
+        //case 0x11:  // ORA, indirect, indexed, Y
+            //switch (this->counter) {
+            //case 4:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);  // zero page pointer
+                //break;
+            //case 3:
+                //tmp[1] = this->addrSpace.r8(tmp[0]);        // effective address low
+                //break;
+            //case 2:
+                //tmp[2] = this->addrSpace.r8(tmp[0] + 1);    // effective address high
+                //break;
+            //case 1:
+                //if (((int)tmp[1] + this->Y) > 0xFF) {
+                    //this->counter = 6;  // decrements to 5
+                    //break;
+                //}
+            //case 5:
+                //this->A |= this->addrSpace.r8(((tmp[2] << 8) + tmp[1] + this->Y) & 0xFFFF);
             
-        case 0xD5:  // CMP, zero page, X
-            switch (this->counter) {
-            case 3:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 2:
-                tmp[1] = this->addrSpace.r8((this->X + tmp[0]) & 0xFF);
-                break;
-            case 1:
-                tmp[2] = this->A - tmp[1];
-                this->setFlag(!(tmp[2]), Flags::ZERO);
-                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
-                this->setFlag(this->A >= tmp[1], Flags::CARRY);
-                break;
-            }
-            break;
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //this->counter = 1;
+                //break;
+            //}
+            //break;
+        //case 0x15:  // ORA, zero page, X
+            //switch (this->counter) {
+            //case 3:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 2:
+                //tmp[0] += this->X;
+                //break;
+            //case 1:
+                //this->A |= this->addrSpace.r8(tmp[0]);
+                
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+        //case 0x16:  // ASL, zero page, X
+            //switch (this->counter) {
+            //case 5:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 4:
+                //tmp[0] += this->X;
+                //break;
+            //case 3:
+                //tmp[1] = this->addrSpace.r8(tmp[0]);
+                //break;
+            //case 2:
+                //this->setFlag(tmp[1] & 0x80, Flags::CARRY);
+                //tmp[1] <<= 1;
+                //break;
+            //case 1:
+                //this->addrSpace.w8(tmp[0], tmp[1]);
+                
+                //this->setFlag(!tmp[1], Flags::ZERO);
+                //this->setFlag(tmp[1] & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+        //case 0x18:  // CLC
+            //switch (this->counter) {
+            //case 1:
+                //this->setFlag(false, Flags::CARRY);
+            //}
+            //break;
+        //case 0x19:  // ORA, absolute, Y
+            //switch (this->counter) {
+                //case 3:
+                    //tmp[0] = this->addrSpace.r8(this->PC.W++);  // address low
+                    //break;
+                //case 2:
+                    //tmp[1] = this->addrSpace.r8(this->PC.W++);  // address high
+                    //tmp[2] = tmp[0] + this->Y;
+                    //break;
+                //case 1:
+                    //if (tmp[1] != (((uint16_t)tmp[0] + this->Y) >> 8)) {
+                        //this->counter = 5; // decremented to 4
+                    //}
+                    //else {
+                        //this->A |= this->addrSpace.r8((tmp[1] << 8) + tmp[2]);
+                        //this->setFlag(!this->A, Flags::ZERO);
+                        //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                    //}
+                    //break;
+                //case 4:
+                    //tmp[1] = ((uint16_t)tmp[0] + this->Y) >> 8;
+                    //this->A |= this->addrSpace.r8((tmp[1] << 8) + tmp[2]);
+                    //this->setFlag(!this->A, Flags::ZERO);
+                    //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+            //}
+            //break;
             
-        case 0xD8:  // CLD
-            switch (this->counter) {
-            case 1:
-                this->setFlag(false, Flags::DECIMAL);
-                break;
-            }
-            break;
+        //case 0x4C:  // JMP, absolute
+            //switch (this->counter) {
+            //case 2:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 1:
+                //this->PC.B.h = this->addrSpace.r8(this->PC.W);
+                //this->PC.B.l = tmp[0];
+                //break;
+            //}
+            //break;
             
-        case 0xE6:  // INC, zero page
-            switch (this->counter) {
-            case 4:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 3:
-                tmp[1] = this->addrSpace.r8(tmp[0]);
-                break;
-            case 2:
-                tmp[2] = tmp[1] + 1;
-                break;
-            case 1:
-                this->addrSpace.w8(tmp[0], tmp[2]);
-                this->setFlag(!tmp[2], Flags::ZERO);
-                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
+        //case 0x71:  // ADC, (indirect),Y
+            //switch (this->counter) {
+            //case 4:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);  // pointer in zero page
+                //break;
+            //case 3:
+                //tmp[1] = this->addrSpace.r8(tmp[0]);        // effective address low
+                //break;
+            //case 2:
+                //tmp[2] = this->addrSpace.r8(tmp[0] + 1);    // effective address high
+                //break;
+            //case 1:
+                //if ((((int)tmp[1]) + this->Y) > 0xFF) {
+                    //this->counter = 6; // decrements to 5
+                    //break;
+                //}
+            //case 5:
+//#ifdef DEBUG
+                //addrout((tmp[2] << 8) + tmp[1] + this->Y);
+//#endif
+                //tmp[0] = this->addrSpace.r8(((tmp[2] << 8) + tmp[1] + this->Y) & 0xFFFF);
+                //this->setFlag(((int)this->A + tmp[0]) > 0xFF, Flags::CARRY);
+                
+                //this->A += tmp[0];
+                
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //this->counter = 1;
+                //break;
+            //}
+            //break;
             
-        case 0xE8:  // INX
-            switch (this->counter) {
-            case 1:
-                this->X++;
-                this->setFlag(!this->X, Flags::ZERO);
-                this->setFlag(this->X & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
+        //case 0x78:  // SEI
+            //switch (this->counter) {
+            //case 1:
+                //this->setFlag(true, Flags::IRQ);
+            //}
+            //break;
             
-        case 0xF6:  // INC, zero page, X
-            switch (this->counter) {
-            case 5:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
-                break;
-            case 4:
-                tmp[0] += this->X;
-                break;
-            case 3:
-                tmp[1] = this->addrSpace.r8(tmp[0]);
-                break;
-            case 2:
-                tmp[2] = tmp[1] + 1;
-                break;
-            case 1:
-                this->addrSpace.w8(tmp[0], tmp[2]);
-                this->setFlag(!tmp[2], Flags::ZERO);
-                this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
-                break;
-            }
-            break;
+        //case 0x85:  // STA, zero page
+            //switch (this->counter) {
+            //case 2:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 1:
+                //this->addrSpace.w8(tmp[0], this->A);
+                //break;
+            //}
+            //break;
+        //case 0x86:  // STX, zero page
+            //switch (this->counter) {
+            //case 2:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 1:
+                //this->addrSpace.w8(tmp[0], this->X);
+                //break;
+            //}
+            //break;
+            
+        //case 0x8A:  // TXA
+            //switch (this->counter) {
+            //case 1:
+                //this->A = this->X;
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+            
+        //case 0x8E:  // STX, absolute
+            //switch (this->counter) {
+            //case 3:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 2:
+                //tmp[1] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 1:
+//#ifdef DEBUG
+                //addrout((tmp[1] << 8) + tmp[0]);
+//#endif
+                //this->addrSpace.w8((tmp[1] << 8) + tmp[0], this->X);
+                //break;
+            //}
+            //break;
+            
+        //case 0x8D:  // STA, absolute
+            //switch (this->counter) {
+            //case 3:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);  // target address low
+                //break;
+            //case 2:
+                //tmp[1] = this->addrSpace.r8(this->PC.W++);  // target address high
+                //break;
+            //case 1:
+//#ifdef DEBUG
+                //addrout((tmp[1] << 8) + tmp[0]);
+//#endif
+                //this->addrSpace.w8((tmp[1] << 8) + tmp[0], this->A);
+                //break;
+            //}
+            //break;
+            
+        //case 0x94:  // STY, zero page, indexed X
+            //switch (this->counter) {
+            //case 3:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 2:
+                //tmp[1] = tmp[0] + this->X;
+//#ifdef DEBUG
+                //addrout((int)tmp[1]);
+//#endif
+                //break;
+            //case 1:
+                //this->addrSpace.w8(tmp[1], this->Y);
+                //break;
+            //}
+            //break;
+        //case 0x95:  // STA, zero page, indexed X
+            //switch (this->counter) {
+            //case 3:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 2:
+                ////tmp[1] = this->addrSpace.r8((uint8_t)(tmp[0] + this->X));
+                //// dummy read
+                //break;
+            //case 1:
+//#ifdef DEBUG
+                //addrout(tmp[0] + this->X);
+//#endif
+                //this->addrSpace.w8((uint8_t)(tmp[0] + this->X), this->A);
+                //break;
+            //}
+            //break;
+            
+        //case 0xA0:  // LDY, immediate
+            //switch (this->counter) {
+            //case 1:
+//#ifdef DEBUG
+                //addrout(this->PC.W);
+//#endif
+                //this->Y = this->addrSpace.r8(this->PC.W++);
+                //this->setFlag(!this->Y, Flags::ZERO);
+                //this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
+            //}
+            //break;
+        
+        //case 0xA2:  // LDX, immediate
+            //switch (this->counter) {
+            //case 1:
+//#ifdef DEBUG
+                //addrout(this->PC.W);
+//#endif
+                //this->X = this->addrSpace.r8(this->PC.W++);
+                //this->setFlag(!this->X, Flags::ZERO);
+                //break;
+            //}
+            //break;
+            
+        //case 0xA8:  // TAY
+            //switch (this->counter) {
+            //case 1:
+                //this->Y = this->A;
+                //this->setFlag(!this->Y, Flags::ZERO);
+                //this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+        //case 0xA9:  // LDA, immediate
+            //switch (this->counter) {
+            //case 1:
+//#ifdef DEBUG
+                //addrout(this->PC.W);
+//#endif
+                //this->A = this->addrSpace.r8(this->PC.W++);
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+            //}
+            //break;
+            
+        //case 0xB5:  // LDA, zero page, indexed X
+            //switch (this->counter) {
+            //case 3:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 2:
+                //tmp[1] = tmp[0] + this->X;
+//#ifdef DEBUG
+                //addrout((int)tmp[1]);
+//#endif
+                //break;
+            //case 1:
+                //this->A = this->addrSpace.r8(tmp[1]);
+                //this->setFlag(!this->A, Flags::ZERO);
+                //this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+            
+        //case 0xC6:  // DEC, zero page
+            //switch (this->counter) {
+            //case 4:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 3:
+                //tmp[1] = this->addrSpace.r8(tmp[0]);
+                //break;
+            //case 2:
+                //tmp[2] = tmp[1] - 1;
+                //break;
+            //case 1:
+                //this->addrSpace.w8(tmp[0], tmp[2]);
+                //this->setFlag(!tmp[2], Flags::ZERO);
+                //this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+            
+        //case 0xC8:  // INY
+            //switch (this->counter) {
+            //case 1:
+                //this->Y++;
+                //this->setFlag(!this->Y, Flags::ZERO);
+                //this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+            
+        //case 0xD0:  // BNE, relative
+            //switch (this->counter) {
+            //case 1:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+//#ifdef DEBUG
+                //std::cout << (int)(int8_t)tmp[0] << std::endl;
+//#endif
+                //this->counter = 3;  // decrements to 2
+                //break;
+            //case 2:
+                //if (!this->checkFlag(Flags::ZERO)) {
+                    //tmp[1] = this->PC.B.l;
+                    //tmp[2] = this->PC.B.h;
+                    //this->PC.B.l += (int8_t)tmp[0];
+                    //if (tmp[2] != this->PC.B.h) {
+                        //this->counter = 4;  // decrements to 3
+                        //break;
+                    //}
+                //}
+                //this->counter = 1;
+                //break;
+            //case 3:
+                //this->PC.B.l = tmp[1];
+                //this->PC.W += (int8_t)tmp[0];
+                //this->counter = 1;
+                //break;
+            //}
+            //break;
+            
+        //case 0xD5:  // CMP, zero page, X
+            //switch (this->counter) {
+            //case 3:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 2:
+                //tmp[1] = this->addrSpace.r8((this->X + tmp[0]) & 0xFF);
+                //break;
+            //case 1:
+                //tmp[2] = this->A - tmp[1];
+                //this->setFlag(!(tmp[2]), Flags::ZERO);
+                //this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
+                //this->setFlag(this->A >= tmp[1], Flags::CARRY);
+                //break;
+            //}
+            //break;
+            
+        //case 0xD8:  // CLD
+            //switch (this->counter) {
+            //case 1:
+                //this->setFlag(false, Flags::DECIMAL);
+                //break;
+            //}
+            //break;
+            
+        //case 0xE6:  // INC, zero page
+            //switch (this->counter) {
+            //case 4:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 3:
+                //tmp[1] = this->addrSpace.r8(tmp[0]);
+                //break;
+            //case 2:
+                //tmp[2] = tmp[1] + 1;
+                //break;
+            //case 1:
+                //this->addrSpace.w8(tmp[0], tmp[2]);
+                //this->setFlag(!tmp[2], Flags::ZERO);
+                //this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+            
+        //case 0xE8:  // INX
+            //switch (this->counter) {
+            //case 1:
+                //this->X++;
+                //this->setFlag(!this->X, Flags::ZERO);
+                //this->setFlag(this->X & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
+            
+        //case 0xF6:  // INC, zero page, X
+            //switch (this->counter) {
+            //case 5:
+                //tmp[0] = this->addrSpace.r8(this->PC.W++);
+                //break;
+            //case 4:
+                //tmp[0] += this->X;
+                //break;
+            //case 3:
+                //tmp[1] = this->addrSpace.r8(tmp[0]);
+                //break;
+            //case 2:
+                //tmp[2] = tmp[1] + 1;
+                //break;
+            //case 1:
+                //this->addrSpace.w8(tmp[0], tmp[2]);
+                //this->setFlag(!tmp[2], Flags::ZERO);
+                //this->setFlag(tmp[2] & 0x80, Flags::NEGATIVE);
+                //break;
+            //}
+            //break;
             
         /*default:    // Unsupported opcode
             std::cerr << "Instruction not implemented yet" << std::endl;
             this->counter = 0;*/
-        default:
+        /*default:
             exit(0);
         }
-    }
+    }*/
     
-    this->counter--;
+    this->counter++;
     this->cycles++;
 }
 
@@ -962,6 +1431,7 @@ std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
        << "Y:\t" << std::hex << (int)cpu.Y << std::endl
        << "SP:\t" << std::hex << (int)cpu.SP << std::endl
        << "PC:\t" << std::hex << (int)cpu.PC.W << std::endl
+       << "IR:\t" << std::hex << (int)cpu.IR << std::endl
        << "Flags" << std::endl
        /*<< "N: " << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << " "
        << "V: " << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "

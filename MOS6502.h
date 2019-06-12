@@ -44,16 +44,45 @@ public:
         OVERFLOW = 64,
         NEGATIVE = 128
     };
+    
+    enum class AddressMode {
+        ACCUMULATOR,
+        IMMEDIATE,
+        ZERO_PAGE,
+        ZERO_PAGE_X,
+        ZERO_PAGE_Y,
+        RELATIVE,
+        ABSOLUTE,
+        ABSOLUTE_X,
+        ABSOLUTE_Y,
+        INDIRECT,
+        INDEXED_INDIRECT,
+        INDIRECT_INDEXED
+    };
 
     MOS6502(AddressSpace *addrSpace);
 
     void reset();
     void step();
     virtual void cycle() override;
-    inline bool checkFlag(Flags f) const;
-    inline bool setFlag(bool condition, Flags f);
+    bool checkFlag(Flags f) const;
+    bool setFlag(bool condition, Flags f);
     
     friend std::ostream& operator <<(std::ostream& os, const MOS6502& cpu);
+    
+private:
+    void ORA(AddressMode addressMode, ...);
+    void AND(AddressMode addressMode, ...);
+    void EOR(AddressMode addressMode, ...);
+    void ADC(AddressMode addressMode, ...);
+    void STA(AddressMode addressMode, ...);
+    void LDA(AddressMode addressMode, ...);
+    void CMP(AddressMode addressMode, ...);
+    void SBC(AddressMode addressMode, ...);
+    
+    
+    typedef void (MOS6502::*operation_t)(MOS6502::AddressMode addressMode, ...);
+    operation_t operations[4][8];
 };
 
 #endif
