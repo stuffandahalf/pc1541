@@ -318,7 +318,7 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     operation_t ops[4][8] = {
         { nullptr },
         { &MOS6502::ORA, &MOS6502::AND, &MOS6502::EOR, &MOS6502::ADC, &MOS6502::STA, &MOS6502::LDA, &MOS6502::CMP, &MOS6502::SBC },
-        { nullptr },
+        { &MOS6502::ASL, &MOS6502::ROL, &MOS6502::LSR, &MOS6502::ROR, &MOS6502::STX, &MOS6502::LDX, &MOS6502::DEC, &MOS6502::INC },
         { nullptr }
     };
     
@@ -746,6 +746,7 @@ void MOS6502::cycle() {
         case 0b000: // immediate
             switch (this->counter) {
             case 1:
+                (this->*(this->operations[instructionGroup][instruction]))(AddressMode::IMMEDIATE, this->addrSpace.r8(this->PC.W++));
                 break;
             case 2:
                 this->IR = this->addrSpace.r8(this->PC.W++);
@@ -754,6 +755,23 @@ void MOS6502::cycle() {
             }
             break;
         case 0b001: // zero page
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                break;
+            case 2:
+                tmp[1] = this->addrSpace.r8(tmp[0]);
+                break;
+            case 3:
+                //(this->*(this->operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE, tmp[1]);
+                break;
+            case 4:
+                break;
+            case 5:
+                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->counter = 0;
+                break;
+            }
             break;
         case 0b010: // accumulator
             break;
