@@ -5,6 +5,7 @@
 #include "Memory.h"
 #include "MOS6502.h"
 #include "MOS6522.h"
+#include "ArduinoInterface.h"
 
 class CBM1541 {
 private:
@@ -14,6 +15,7 @@ private:
     MOS6522 *motorHeadVia;
     ROM *rom;
     RAM *ram;
+    ArduinoInterface *interface;
     
 public:
     CBM1541(std::string romPath);
