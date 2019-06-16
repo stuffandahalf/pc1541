@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include "CBMDriveEmu.h"
 #include "CBM1541.h"
-#include "types.h"
 
 #ifdef _GNU_SOURCE
 #include <getopt.h>
@@ -41,7 +41,8 @@ int main(int argc, char **argv)
 }
 
 int configure(int argc, char **argv, struct config *cfg) {
-    int opt;
+    int opt = 0;
+    char *endPtr = nullptr;
     ifstream *firmwareStream = nullptr;
     
 #ifdef _GNU_SOURCE
@@ -62,19 +63,26 @@ int configure(int argc, char **argv, struct config *cfg) {
                 cerr << "Only one device may be specified." << endl;
                 return -2;
             }
-            std::cout << "device: " << optarg << std::endl;
+            //std::cout << "device: " << optarg << std::endl;
+            printdf("Device: %s\n", optarg);
             cfg->devPath = new string(optarg);
             break;
         case 'b':
-            std::cout << "baud: " << optarg << std::endl;
-            //cfg->baud =
+            //std::cout << "baud: " << optarg << std::endl;
+            printdf("Baud: %s\n", optarg);
+            cfg->baud = strtol(optarg, &endPtr, 0);
+            if (*endPtr != '\0') {
+                cerr << "Baud rate must a number in bits per second." << endl;
+                return -2;
+            }
             break;
         case 'f':
             if (cfg->firmware.data != nullptr) {
                 cerr << "Firmware has already been initialied." << endl;
                 return -2;
             }
-            std::cout << "firmware: " << optarg << std::endl;
+            //std::cout << "firmware: " << optarg << std::endl;
+            printdf("Firmware: %s\n", optarg);
             firmwareStream = new ifstream(optarg);
                 
             if (!firmwareStream->is_open()) {

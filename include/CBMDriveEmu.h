@@ -1,8 +1,15 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef CBMDRIVEEMU_H
+#define CBMDRIVEEMU_H
 
 #include <cstdint>
 #include <string>
+
+#ifndef NDEBUG
+extern int printf(const char *fmt, ...);
+#define printdf(fmt, ...) printf("[%s.%d] >> " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+#else
+#define printdf(fmt, ...)
+#endif
 
 typedef union {
     uint16_t W;
@@ -23,7 +30,7 @@ struct config {
         uint8_t *data;
     } firmware;
     std::string *devPath;
-    int baud;
+    long int baud;
 };
 
-#endif
+#endif /* CBMDRIVEEMU_H */

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstdint>
 #include "cpuemu.h"
-#include "types.h"
+#include "CBMDriveEmu.h"
 #include "Memory.h"
 #include "IClockable.h"
 

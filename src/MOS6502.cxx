@@ -3,7 +3,7 @@
 #include <cstdarg>
 
 typedef unsigned int uint;
-typedef Instruction i_t;
+/*typedef Instruction i_t;
 static Instruction instructions[16][16] = {
     { // 0x0*
         { "BRK", 0x00, 1, 7,  i_t::CycleMod::NONE },
@@ -293,7 +293,7 @@ static Instruction instructions[16][16] = {
         { "INC", 0xFE, 3, 7, i_t::CycleMod::NONE },
         { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
     }
-};
+};*/
 
 
 MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
@@ -704,7 +704,7 @@ void MOS6502::cycle() {
                 tmp[2] = this->addrSpace.r8(tmp[0] + 1);    // target address high
                 break;
             case 4:
-                if (((tmp[2] << 8) + tmp[1] + this->Y) & 0xFF != (tmp[1] + this->Y)) {
+                if ((((tmp[2] << 8) + tmp[1] + this->Y) & 0xFF) != (tmp[1] + this->Y)) {
                     break;
                 }
                 this->counter++;

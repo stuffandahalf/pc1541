@@ -1,7 +1,7 @@
 #ifndef CBM1541_H
 #define CBM1541_H
 
-#include "types.h"
+#include "CBMDriveEmu.h"
 #include "IDrive.h"
 #include "Memory.h"
 #include "MOS6502.h"
