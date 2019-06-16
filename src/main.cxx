@@ -98,9 +98,9 @@ int configure(int argc, char **argv, struct config *cfg) {
         }
     }
     
-    /*if (cfg->devPath == nullptr || cfg->firmwarePath == nullptr) {
-        return -2;
-    }*/
+    if (cfg->devPath == nullptr || cfg->firmware.data == nullptr) {
+        return -3;
+    }
     
     return 1;
 }
