@@ -3,6 +3,7 @@ project(pc1541)
 include_directories(include)
 #set(SOURCES src/main.cxx src/CBM1541.cxx src/Memory.cxx src/MOS6502.cxx src/MOS6522.cxx src/Registers.cxx src/ArduinoInterface.cxx
 file(GLOB SOURCES "src/*.cxx")
+file(GLOB HEADERS "include/*.h")
 
 macro(use_cxx11)
   if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -16,4 +17,4 @@ endmacro(use_cxx11)
 
 use_cxx11()
 
-add_executable(pc1541 ${SOURCES})
+add_executable(pc1541 ${SOURCES} ${HEADERS})
