@@ -19,13 +19,17 @@ int configure(int argc, char **argv, struct config *cfg);
 
 int main(int argc, char **argv)
 {
-    struct config cfg;
+    struct config cfg {
+        .firmwarePath = nullptr,
+        .devPath = nullptr,
+        .baud = 115200
+    };
     if (configure(argc, argv, &cfg) < 0) {
         std::cerr << "Failed to configure pc1541" << std::endl;
         return 1;
     }
     
-    CBM1541 *drive = new CBM1541("firmware/dos1541");
+    CBM1541 *drive = new CBM1541("../firmware/dos1541");
     drive->execute();
     delete drive;
 	return 0;
