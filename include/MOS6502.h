@@ -18,7 +18,7 @@ private:
     uint8_t X;      // X index
     uint8_t Y;      // Y index
     uint8_t SP;     // Stack pointer
-    word_t PC;      // Program counter
+    uint16_t PC;      // Program counter
     uint8_t P;      // Processor flags
     
     AddressSpace& addrSpace;

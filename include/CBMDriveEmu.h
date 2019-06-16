@@ -11,7 +11,7 @@ extern int printf(const char *fmt, ...);
 #define printdf(fmt, ...)
 #endif
 
-typedef union {
+/*typedef union {
     uint16_t W;
     struct {
 #ifdef LOW_ENDIAN
@@ -22,7 +22,23 @@ typedef union {
         uint8_t h;
 #endif
     } __attribute__((packed)) B;
-} word_t;
+} word_t;*/
+
+// From https://stackoverflow.com/questions/1583791/constexpr-and-endianness
+class Endian
+{
+private:
+    static constexpr uint32_t uint32_ = 0x01020304;
+    static constexpr uint8_t magic_ = (const uint8_t&)uint32_;
+public:
+    static constexpr bool little = magic_ == 0x04;
+    static constexpr bool middle = magic_ == 0x02;
+    static constexpr bool big = magic_ == 0x01;
+    static_assert(little || middle || big, "Cannot determine endianness!");
+private:
+    Endian() = delete;
+};
+
 
 struct config {
     struct {

@@ -302,7 +302,7 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     this->X = 0;
     this->Y = 0;
     this->SP = 0;
-    this->PC.W = 0xFFFC;    // Reset vector
+    this->PC = 0xFFFC;    // Reset vector
     this->P = 32;           // All flags 0 except for unused flag
     
     this->counter = 0;
@@ -331,14 +331,14 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
 
 void MOS6502::reset() {
     uint16_t start = 0;
-    start |= this->addrSpace.r8(this->PC.W++);
-    start |= this->addrSpace.r8(this->PC.W) << 8;
+    start |= this->addrSpace.r8(this->PC++);
+    start |= this->addrSpace.r8(this->PC) << 8;
     printf("%X\n", start);
-    this->PC.W = start;
+    this->PC = start;
     
     this->P |= (uint8_t)Flags::IRQ;
     
-    this->IR = this->addrSpace.r8(this->PC.W++);
+    this->IR = this->addrSpace.r8(this->PC++);
 }
 
 /* Instruction group 1 */
@@ -629,7 +629,7 @@ void MOS6502::cycle() {
         case 0b000: // (zero page/indirect, X)
             switch (this->counter) {
             case 1:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                tmp[0] = this->addrSpace.r8(this->PC++);
                 break;
             case 2:
                 tmp[0] += this->X;
@@ -645,7 +645,7 @@ void MOS6502::cycle() {
                 (this->*(this->operations[instructionGroup][instruction]))(AddressMode::INDEXED_INDIRECT, (tmp[2] << 8) + tmp[1]);
                 break;
             case 6:
-                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->IR = this->addrSpace.r8(this->PC++);
                 this->counter = 0;
                 break;
             }
@@ -653,13 +653,13 @@ void MOS6502::cycle() {
         case 0b001: // zero page
             switch (this->counter) {
             case 1:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                tmp[0] = this->addrSpace.r8(this->PC++);
                 break;
             case 2:
                 (this->*(this->operations[1][instruction]))(AddressMode::ZERO_PAGE, tmp[0]);
                 break;
             case 3:
-                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->IR = this->addrSpace.r8(this->PC++);
                 this->counter = 0;
                 break;
             }
@@ -667,27 +667,27 @@ void MOS6502::cycle() {
         case 0b010: // immediate
             switch (this->counter) {
             case 1:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                tmp[0] = this->addrSpace.r8(this->PC++);
                 (this->*(this->operations[instructionGroup][instruction]))(AddressMode::IMMEDIATE, tmp[0]);
                 break;
             case 2:
-                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->IR = this->addrSpace.r8(this->PC++);
                 this->counter = 0;
             }
             break;
         case 0b011: // absolute
             switch (this->counter) {
             case 1:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);  // address low
+                tmp[0] = this->addrSpace.r8(this->PC++);  // address low
                 break;
             case 2:
-                tmp[1] = this->addrSpace.r8(this->PC.W++);  // address high
+                tmp[1] = this->addrSpace.r8(this->PC++);  // address high
                 break;
             case 3:
                 (this->*(this->operations[instructionGroup][instruction]))(AddressMode::IMMEDIATE, (tmp[1] << 8) + tmp[0]);
                 break;
             case 4:
-                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->IR = this->addrSpace.r8(this->PC++);
                 this->counter = 0;
                 break;
             }
@@ -695,7 +695,7 @@ void MOS6502::cycle() {
         case 0b100: // (zero page), Y
             switch (this->counter) {
             case 1:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);  // zero page ptr
+                tmp[0] = this->addrSpace.r8(this->PC++);  // zero page ptr
                 break;
             case 2:
                 tmp[1] = this->addrSpace.r8(tmp[0]);        // target address low
@@ -712,7 +712,7 @@ void MOS6502::cycle() {
                 (this->*(this->operations[instructionGroup][instruction]))(AddressMode::INDIRECT_INDEXED, (uint16_t)((tmp[2] << 8) + tmp[1] + this->Y));
                 break;
             case 6:
-                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->IR = this->addrSpace.r8(this->PC++);
                 this->counter = 0;
                 break;
             }
@@ -720,14 +720,14 @@ void MOS6502::cycle() {
         case 0b101: // zero page, X
             switch (this->counter) {
             case 1:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);  // zero page address
+                tmp[0] = this->addrSpace.r8(this->PC++);  // zero page address
                 break;
             case 2:
                 tmp[0] += this->X;
             case 3:
                 (this->*(this->operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE_X, tmp[0]);
             case 4:
-                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->IR = this->addrSpace.r8(this->PC++);
                 this->counter = 0;
                 break;
             }
@@ -737,10 +737,10 @@ void MOS6502::cycle() {
             tmp[2] = (addressMode & 1) ? this->X : this->Y; // set index register
             switch (this->counter) {
             case 1:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);  // address low
+                tmp[0] = this->addrSpace.r8(this->PC++);  // address low
                 break;
             case 2:
-                tmp[1] = this->addrSpace.r8(this->PC.W++);  // address high
+                tmp[1] = this->addrSpace.r8(this->PC++);  // address high
             case 3:
                 if (((uint16_t)tmp[0] + tmp[2]) & 0xFF00) {
                     break;
@@ -749,7 +749,7 @@ void MOS6502::cycle() {
             case 4:
                 (this->*(this->operations[instructionGroup][instruction]))((instruction & 1) ? AddressMode::ABSOLUTE_X : AddressMode::ABSOLUTE_Y, (tmp[1] << 8) + tmp[0] + tmp[2]);
             case 5:
-                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->IR = this->addrSpace.r8(this->PC++);
                 this->counter = 0;
                 break;
             }
@@ -763,10 +763,10 @@ void MOS6502::cycle() {
         case 0b000: // immediate
             switch (this->counter) {
             case 1:
-                (this->*(this->operations[instructionGroup][instruction]))(AddressMode::IMMEDIATE, this->addrSpace.r8(this->PC.W++));
+                (this->*(this->operations[instructionGroup][instruction]))(AddressMode::IMMEDIATE, this->addrSpace.r8(this->PC++));
                 break;
             case 2:
-                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->IR = this->addrSpace.r8(this->PC++);
                 this->counter = 0;
                 break;
             }
@@ -774,7 +774,7 @@ void MOS6502::cycle() {
         case 0b001: // zero page
             switch (this->counter) {
             case 1:
-                tmp[0] = this->addrSpace.r8(this->PC.W++);
+                tmp[0] = this->addrSpace.r8(this->PC++);
                 break;
             case 2:
                 //if (
@@ -783,7 +783,7 @@ void MOS6502::cycle() {
             case 3:
                 //(this->*(this->operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE, &tmp[1]);
                 if ((instruction >> 1) == 0b10) {
-                    this->IR = this->addrSpace.r8(this->PC.W++);
+                    this->IR = this->addrSpace.r8(this->PC++);
                     this->counter = 0;
                 }
                 break;
@@ -791,7 +791,7 @@ void MOS6502::cycle() {
                 this->addrSpace.w8(tmp[0], tmp[1]);
                 break;
             case 5:
-                this->IR = this->addrSpace.r8(this->PC.W++);
+                this->IR = this->addrSpace.r8(this->PC++);
                 this->counter = 0;
                 break;
             }
@@ -1543,7 +1543,7 @@ std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
        << "X:\t" << std::hex << (int)cpu.X << std::endl
        << "Y:\t" << std::hex << (int)cpu.Y << std::endl
        << "SP:\t" << std::hex << (int)cpu.SP << std::endl
-       << "PC:\t" << std::hex << (int)cpu.PC.W << std::endl
+       << "PC:\t" << std::hex << (int)cpu.PC << std::endl
        << "IR:\t" << std::hex << (int)cpu.IR << std::endl
        << "Flags" << std::endl
        /*<< "N: " << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << " "
