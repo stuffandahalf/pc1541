@@ -562,7 +562,14 @@ inline void MOS6502::SBC(MOS6502::AddressMode addressMode, ...) {
 
 /* instruction group 2 */
 inline void MOS6502::ASL(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
     
+    switch (addressMode) {
+        
+    }
+    
+    va_end(args);
 }
 inline void MOS6502::ROL(MOS6502::AddressMode addressMode, ...) {
     
@@ -577,7 +584,17 @@ inline void MOS6502::STX(MOS6502::AddressMode addressMode, ...) {
     
 }
 inline void MOS6502::LDX(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
     
+    switch (addressMode) {
+    case AddressMode::ZERO_PAGE:
+        uint8_t *var = va_arg(args, uint8_t *);
+        this->X = *var;
+        break;
+    }
+    
+    va_end(args);
 }
 inline void MOS6502::DEC(MOS6502::AddressMode addressMode, ...) {
     
@@ -760,12 +777,18 @@ void MOS6502::cycle() {
                 tmp[0] = this->addrSpace.r8(this->PC.W++);
                 break;
             case 2:
-                tmp[1] = this->addrSpace.r8(tmp[0]);
+                //if (
+                //tmp[1] = this->addrSpace.r8(tmp[0]);
                 break;
             case 3:
-                //(this->*(this->operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE, tmp[1]);
+                //(this->*(this->operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE, &tmp[1]);
+                if ((instruction >> 1) == 0b10) {
+                    this->IR = this->addrSpace.r8(this->PC.W++);
+                    this->counter = 0;
+                }
                 break;
             case 4:
+                this->addrSpace.w8(tmp[0], tmp[1]);
                 break;
             case 5:
                 this->IR = this->addrSpace.r8(this->PC.W++);
@@ -800,7 +823,7 @@ void MOS6502::cycle() {
         case 0x01:  // (indirect,X)
         case 0x03:
             std::cout << "(Indirect, X)" << std::endl;
-            break;
+             break;
             
         case 0x04:  // Zero page
         case 0x05:

@@ -9,7 +9,7 @@
 #include "IClockable.h"
 
 #define DEBUG
-#define addrout(addr) std::cout << std::hex << (addr) << std::dec << std::endl;
+#define addrout(addr) std::cout << std::hex << (addr) << std::dec << std::endl
 
 class MOS6502 : IClockable {
 private:
