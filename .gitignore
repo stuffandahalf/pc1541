@@ -33,6 +33,7 @@
 
 pc1541
 .DS_Store
+xcode
 
 # CMake files
 CMakeLists.txt.user

@@ -18,6 +18,7 @@ public:
         Byte();
         Byte(uint8_t *ptr);
         Byte(uint8_t *readPtr, uint8_t *writePtr);
+        virtual ~Byte() { }
         
         virtual inline uint8_t read() {
             return this->readPtr ? *this->readPtr : 0xFF;
@@ -49,6 +50,7 @@ class IMemory {
 public:
     virtual std::size_t getSize() = 0;
     virtual AddressSpace::Byte **getBytes() = 0;
+    virtual ~IMemory() { }
 };
 
 class ROM : public IMemory {
@@ -58,7 +60,7 @@ private:
     AddressSpace::Byte **buffer;
 
 public:
-    ROM(std::string firmwarePath);
+    ROM(std::string& firmwarePath);
     ~ROM();
     
     virtual std::size_t getSize();
@@ -73,7 +75,7 @@ private:
     
 public:
     RAM(std::size_t size);
-    ~RAM();
+    virtual ~RAM();
     
     virtual std::size_t getSize();
     virtual AddressSpace::Byte **getBytes();

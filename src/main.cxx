@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "CBM1541.h"
 
 #ifdef _GNU_SOURCE
@@ -10,7 +11,10 @@
 using namespace std;
 
 struct config {
-    std::string *firmwarePath;
+    struct {
+        size_t size;
+        uint8_t *data;
+    } firmware;
     std::string *devPath;
     int baud;
 };
@@ -20,7 +24,10 @@ int configure(int argc, char **argv, struct config *cfg);
 int main(int argc, char **argv)
 {
     struct config cfg {
-        .firmwarePath = nullptr,
+        .firmware = {
+            .size = 0,
+            .data = nullptr
+        },
         .devPath = nullptr,
         .baud = 115200
     };
@@ -37,6 +44,7 @@ int main(int argc, char **argv)
 
 int configure(int argc, char **argv, struct config *cfg) {
     int opt;
+    ifstream *firmwareStream = nullptr;
     
 #ifdef _GNU_SOURCE
     struct option long_opts[] = {
@@ -53,21 +61,39 @@ int configure(int argc, char **argv, struct config *cfg) {
         switch (opt) {
         case 'd':
             std::cout << "device: " << optarg << std::endl;
+            cfg->devPath = new string(optarg);
             break;
         case 'b':
             std::cout << "baud: " << optarg << std::endl;
+            //cfg->baud =
             break;
         case 'f':
             std::cout << "firmware: " << optarg << std::endl;
+            firmwareStream = new ifstream(optarg);
+                
+            if (!firmwareStream->is_open()) {
+                cerr << "Failed to open firmware file " << optarg << '.' << endl;
+                return -2;
+            }
+                
+            firmwareStream->seekg(0, firmwareStream->end);
+            cfg->firmware.size = firmwareStream->tellg();
+            firmwareStream->seekg(0, firmwareStream->beg);
+            
+            cfg->firmware.data = new uint8_t[cfg->firmware.size];
+            firmwareStream->read((char *)cfg->firmware.data, cfg->firmware.size);
+            firmwareStream->close();
+                
+            delete firmwareStream;
             break;
         default:
             return -1;
         }
     }
     
-    if (cfg->devPath == nullptr || cfg->firmwarePath == nullptr) {
+    /*if (cfg->devPath == nullptr || cfg->firmwarePath == nullptr) {
         return -2;
-    }
+    }*/
     
     return 1;
 }

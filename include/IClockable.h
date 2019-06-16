@@ -4,6 +4,7 @@
 class IClockable {
 public:
     virtual void cycle() = 0;
+    virtual ~IClockable() { }
 };
 
 #endif

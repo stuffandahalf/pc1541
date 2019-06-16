@@ -37,7 +37,7 @@ AddressSpace::Byte::Byte(uint8_t *readPtr, uint8_t *writePtr) {
 
 
 
-ROM::ROM(std::string firmwarePath) {
+ROM::ROM(std::string& firmwarePath) {
     std::ifstream firmwareFile(firmwarePath);
     
     firmwareFile.seekg(0, firmwareFile.end);
