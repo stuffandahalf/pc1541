@@ -1,13 +1,14 @@
 #ifndef CBM1541_H
 #define CBM1541_H
 
-//#include <string>
+#include "types.h"
+#include "IDrive.h"
 #include "Memory.h"
 #include "MOS6502.h"
 #include "MOS6522.h"
 #include "ArduinoInterface.h"
 
-class CBM1541 {
+class CBM1541 : public IDrive {
 private:
     AddressSpace *addrSpace;
     MOS6502 *cpu;
@@ -18,10 +19,10 @@ private:
     ArduinoInterface *interface;
     
 public:
-    CBM1541(std::string romPath);
+    CBM1541(struct config& cfg);
     ~CBM1541();
     
-    void execute();
+    virtual void execute() override;
     
 };
 

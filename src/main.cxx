@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "CBM1541.h"
+#include "types.h"
 
 #ifdef _GNU_SOURCE
 #include <getopt.h>
@@ -9,15 +10,6 @@
 #endif
 
 using namespace std;
-
-struct config {
-    struct {
-        size_t size;
-        uint8_t *data;
-    } firmware;
-    std::string *devPath;
-    int baud;
-};
 
 int configure(int argc, char **argv, struct config *cfg);
 
@@ -33,10 +25,16 @@ int main(int argc, char **argv)
     };
     if (configure(argc, argv, &cfg) < 0) {
         std::cerr << "Failed to configure pc1541" << std::endl;
+        if (cfg.devPath != nullptr) {
+            delete cfg.devPath;
+        }
+        if (cfg.firmware.data != nullptr) {
+            delete[] cfg.firmware.data;
+        }
         return 1;
     }
     
-    CBM1541 *drive = new CBM1541("../firmware/dos1541");
+    CBM1541 *drive = new CBM1541(cfg);
     drive->execute();
     delete drive;
 	return 0;
@@ -60,6 +58,10 @@ int configure(int argc, char **argv, struct config *cfg) {
 #endif
         switch (opt) {
         case 'd':
+            if (cfg->devPath != nullptr) {
+                cerr << "Only one device may be specified." << endl;
+                return -2;
+            }
             std::cout << "device: " << optarg << std::endl;
             cfg->devPath = new string(optarg);
             break;
@@ -68,6 +70,10 @@ int configure(int argc, char **argv, struct config *cfg) {
             //cfg->baud =
             break;
         case 'f':
+            if (cfg->firmware.data != nullptr) {
+                cerr << "Firmware has already been initialied." << endl;
+                return -2;
+            }
             std::cout << "firmware: " << optarg << std::endl;
             firmwareStream = new ifstream(optarg);
                 
@@ -85,6 +91,7 @@ int configure(int argc, char **argv, struct config *cfg) {
             firmwareStream->close();
                 
             delete firmwareStream;
+            firmwareStream = nullptr;
             break;
         default:
             return -1;

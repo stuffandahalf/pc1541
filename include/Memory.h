@@ -60,9 +60,11 @@ private:
     AddressSpace::Byte **buffer;
 
 public:
-    ROM(std::string& firmwarePath);
+    ROM(std::size_t size);
     ~ROM();
     
+    int load(std::string& fname);
+    int load(std::size_t size, uint8_t *data);
     virtual std::size_t getSize();
     virtual AddressSpace::Byte **getBytes();
 };

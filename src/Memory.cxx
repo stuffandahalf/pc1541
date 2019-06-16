@@ -37,26 +37,21 @@ AddressSpace::Byte::Byte(uint8_t *readPtr, uint8_t *writePtr) {
 
 
 
-ROM::ROM(std::string& firmwarePath) {
-    std::ifstream firmwareFile(firmwarePath);
-    
-    firmwareFile.seekg(0, firmwareFile.end);
-    this->size = firmwareFile.tellg();
-    firmwareFile.seekg(0, firmwareFile.beg);
-    
-    this->rawBuffer = new uint8_t[this->size];
-    firmwareFile.read((char *)this->rawBuffer, this->size);
-    firmwareFile.close();
-    
+ROM::ROM(std::size_t size) {
+    this->size = size;
+    this->rawBuffer = new uint8_t[size];
     this->buffer = new AddressSpace::Byte *[this->size];
     for (int i = 0; i < this->size; i++) {
+        this->rawBuffer[i] = 0xFF;
         this->buffer[i] = new AddressSpace::Byte(&(this->rawBuffer[i]), nullptr);
     }
 }
 
 ROM::~ROM() {
     for (int i = 0; i < this->size; i++) {
-        delete this->buffer[i];
+        if (this->buffer[i] != nullptr) {
+            delete this->buffer[i];
+        }
     }
     delete[] this->buffer;
     delete[] this->rawBuffer;
@@ -70,6 +65,36 @@ AddressSpace::Byte **ROM::getBytes() {
     return this->buffer;
 }
 
+int ROM::load(std::string& fname) {
+    std::size_t dataSize;
+    
+    std::ifstream fileStream(fname);
+    fileStream.seekg(0, fileStream.end);
+    dataSize = fileStream.tellg();
+    fileStream.seekg(0, fileStream.beg);
+    
+    if (dataSize > this->size) {
+        fileStream.close();
+        return -1;
+    }
+    
+    fileStream.read((char *)this->rawBuffer, this->size);
+    fileStream.close();
+    
+    //return this->load(dataSize, this->rawBuffer);
+    return 1;
+    
+}
+
+int ROM::load(std::size_t size, uint8_t *data) {
+    if (size > this->size) {
+        return -1;
+    }
+    for (int i = 0; i < this->size; i++) {
+        this->rawBuffer[i] = data[i];
+    }
+    return 1;
+}
 
 
 RAM::RAM(std::size_t size) {

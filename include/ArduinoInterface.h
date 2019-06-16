@@ -8,19 +8,22 @@
 #include <fcntl.h>
 #include "IClockable.h"
 
-class ArduinoInterface /*: IClockable*/ {
+class ArduinoInterface : public IClockable {
 private:
-    int dev;
+    int fd;
     std::string devPath;
     int baud;
     
 public:
-    ArduinoInterface(std::string& devName, int baud);
+    ArduinoInterface(std::string devName, int baud);
+    ArduinoInterface(std::string devName);
+    ArduinoInterface(const char *devName, int baud);
+    ArduinoInterface(const char *devName);
     ~ArduinoInterface();
     
     int open();
     void close();
-    //virtual void cycle() override;
+    virtual void cycle() override;
 };
 
 #endif
