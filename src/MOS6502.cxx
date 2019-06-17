@@ -565,42 +565,155 @@ inline void MOS6502::ASL(MOS6502::AddressMode addressMode, ...) {
     va_list args;
     va_start(args, addressMode);
     
+    uint8_t *val;
+    
     switch (addressMode) {
-        
+    case AddressMode::ZERO_PAGE:
+        val = va_arg(args, uint8_t *);
+        break;
     }
+    
+    this->setFlag(*val & 0x80, Flags::CARRY);
+    *val <<= 1;
+    this->setFlag(*val & 0x80, Flags::NEGATIVE);
+    this->setFlag(!(*val), Flags::ZERO);
+    
     
     va_end(args);
 }
 inline void MOS6502::ROL(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
     
+    uint8_t *val;
+    
+    switch (addressMode) {
+    case AddressMode::ZERO_PAGE:
+        val = va_arg(args, uint8_t *);
+        break;
+    }
+    
+    uint8_t oldVal = *val;
+    *val <<= 1;
+    *val |= this->checkFlag(Flags::CARRY);
+    printdf("Carry flag value 0x%X", this->checkFlag(Flags::CARRY));
+    
+    this->setFlag(oldVal & 0x80, Flags::CARRY);
+    this->setFlag(*val & 0x80, Flags::NEGATIVE);
+    this->setFlag(!(*val), Flags::ZERO);
+    
+    va_end(args);
 }
 inline void MOS6502::LSR(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
     
+    uint8_t *val;
+    
+    switch (addressMode) {
+    case AddressMode::ZERO_PAGE:
+        val = va_arg(args, uint8_t *);
+        break;
+    }
+    
+    this->setFlag(*val & 1, Flags::CARRY);
+    *val >>= 1;
+    this->setFlag(!(*val), Flags::ZERO);
+    this->setFlag(*val & 0x80, Flags::NEGATIVE);    // pointless? bit 7 will always be 0
+    
+    va_end(args);
 }
 inline void MOS6502::ROR(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
     
+    uint8_t *val;
+    
+    switch (addressMode) {
+    case AddressMode::ZERO_PAGE:
+        val = va_arg(args, uint8_t *);
+        break;
+    }
+    
+    uint8_t oldVal = *val;
+    *val >>= 1;
+    *val |= (this->checkFlag(Flags::CARRY) << 7);
+    
+    this->setFlag(oldVal & 1, Flags::CARRY);
+    this->setFlag(*val & 0x80, Flags::NEGATIVE);
+    this->setFlag(!(*val), Flags::ZERO);
+    
+    va_end(args);
 }
 inline void MOS6502::STX(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
     
+    uint16_t address;
+    
+    switch (addressMode) {
+    case AddressMode::ZERO_PAGE:
+        address = (uint16_t)va_arg(args, int);
+        break;
+    }
+    
+    this->addrSpace.w8(address, this->X);
+    
+    va_end(args);
 }
 inline void MOS6502::LDX(MOS6502::AddressMode addressMode, ...) {
     va_list args;
     va_start(args, addressMode);
     
+    uint8_t val;
+    
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
-        uint8_t *var = va_arg(args, uint8_t *);
-        this->X = *var;
+        val = this->addrSpace.r8((uint16_t)va_arg(args, int));
         break;
     }
+    
+    this->X = val;
+    this->setFlag(!this->X, Flags::ZERO);
+    this->setFlag(this->X & 0x80, Flags::NEGATIVE);
     
     va_end(args);
 }
 inline void MOS6502::DEC(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
     
+    uint8_t *val;
+    
+    switch (addressMode) {
+    case AddressMode::ZERO_PAGE:
+        val = va_arg(args, uint8_t *);
+        break;
+    }
+    
+    (*val)--;
+    this->setFlag(!(*val), Flags::ZERO);
+    this->setFlag(*val & 0x80, Flags::NEGATIVE);
+    
+    va_end(args);
 }
 inline void MOS6502::INC(MOS6502::AddressMode addressMode, ...) {
+    va_list args;
+    va_start(args, addressMode);
     
+    uint8_t *val;
+    
+    switch (addressMode) {
+    case AddressMode::ZERO_PAGE:
+        val = va_arg(args, uint8_t *);
+        break;
+    }
+    
+    (*val)++;
+    this->setFlag(!(*val), Flags::ZERO);
+    this->setFlag(*val & 0x80, Flags::NEGATIVE);
+    
+    va_end(args);
 }
 
 void MOS6502::step() {
@@ -772,28 +885,40 @@ void MOS6502::cycle() {
             }
             break;
         case 0b001: // zero page
-            switch (this->counter) {
-            case 1:
-                tmp[0] = this->addrSpace.r8(this->PC++);
-                break;
-            case 2:
-                //if (
-                //tmp[1] = this->addrSpace.r8(tmp[0]);
-                break;
-            case 3:
-                //(this->*(this->operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE, &tmp[1]);
-                if ((instruction >> 1) == 0b10) {
+            switch (instruction >> 1) { // 3 or 5 cycle instruction
+            case 0b10:
+                switch (this->counter) {
+                case 1:
+                    tmp[0] = this->addrSpace.r8(this->PC++);
+                    break;
+                case 2:
+                    (this->*(this->operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE, tmp[0]);
+                    break;
+                case 3:
                     this->IR = this->addrSpace.r8(this->PC++);
                     this->counter = 0;
+                    break;
                 }
                 break;
-            case 4:
-                this->addrSpace.w8(tmp[0], tmp[1]);
-                break;
-            case 5:
-                this->IR = this->addrSpace.r8(this->PC++);
-                this->counter = 0;
-                break;
+            default:
+                switch (this->counter) {
+                case 1:
+                    tmp[0] = this->addrSpace.r8(this->PC++);
+                    break;
+                case 2:
+                    tmp[1] = this->addrSpace.r8(tmp[0]);
+                    break;
+                case 3:
+                    (this->*(this->operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE, &tmp[1]);
+                    break;
+                case 4:
+                    this->addrSpace.w8(tmp[0], tmp[1]);
+                    break;
+                case 5:
+                    this->IR = this->addrSpace.r8(this->PC++);
+                    this->counter = 0;
+                    break;
+                }
             }
             break;
         case 0b010: // accumulator
