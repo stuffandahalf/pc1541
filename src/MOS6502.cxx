@@ -922,6 +922,13 @@ void MOS6502::cycle() {
             }
             break;
         case 0b010: // accumulator
+            switch (this->counter) {
+            case 1:
+                
+                break;
+            case 2:
+                break;
+            }
             break;
         case 0b011: // absolute
             break;

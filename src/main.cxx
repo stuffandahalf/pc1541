@@ -37,6 +37,12 @@ int main(int argc, char **argv)
     CBM1541 *drive = new CBM1541(cfg);
     drive->execute();
     delete drive;
+    
+    /*ArduinoInterface *iface = new ArduinoInterface(*cfg.devPath, cfg.baud);
+    iface->open();
+    iface->write("Hello World", 11);
+    iface->close();
+    delete iface;*/
 	return 0;
 }
 

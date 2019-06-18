@@ -59,12 +59,31 @@ int ArduinoInterface::open() {
     return 1;
 }
 
-/*void ArduinoInterface::test() {
-    fprintf(this->dev, "This is a test");
-}*/
+void ArduinoInterface::write(const char *str, std::size_t count) {
+    //fprintf(this->dev, "This is a test");
+    int64_t received = 0;
+    int64_t remainingCount = count;
+    
+    char *bufferBase = new char[count + 1];
+    bufferBase[count] = '\0';
+    char *buffer = bufferBase;
+    ::write(this->fd, str, count);
+    while (received < count) {
+        int64_t incoming = ::read(this->fd, buffer, remainingCount);
+        if (incoming > 0) {
+            buffer += incoming;
+            remainingCount -= incoming;
+            received += incoming;
+        }
+    }
+    
+    std::cout << bufferBase << std::endl;
+    
+    delete[] bufferBase;
+}
 
 void ArduinoInterface::cycle() {
-    write(this->fd, "Hello\n", 6);
+    this->write("Hello\n", 6);
 }
 
 void ArduinoInterface::close() {

@@ -21,6 +21,7 @@ public:
     ArduinoInterface(const char *devName);
     ~ArduinoInterface();
     
+    void write(const char *str, std::size_t count);
     int open();
     void close();
     virtual void cycle() override;
