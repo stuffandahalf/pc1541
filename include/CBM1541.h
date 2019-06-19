@@ -22,6 +22,7 @@ public:
     CBM1541(struct config& cfg);
     ~CBM1541();
     
+    int initialize();
     virtual void execute() override;
     
 };

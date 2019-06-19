@@ -15,9 +15,6 @@ CBM1541::CBM1541(struct config& cfg) {
     this->addrSpace->map(0x1800, this->serialVia->getRegisters());
     this->addrSpace->map(0x1C00, this->motorHeadVia->getRegisters());
     this->addrSpace->map(0xC000, *this->rom);
-    
-    this->cpu->reset();
-    this->interface->open();
 }
 
 CBM1541::~CBM1541() {
@@ -31,9 +28,13 @@ CBM1541::~CBM1541() {
     delete this->addrSpace;
 }
 
-/*int CBM1541::initialize() {
-    
-}*/
+int CBM1541::initialize() {
+    if (this->interface->open() < 0) {
+        return -1;
+    }
+    this->cpu->reset();
+    return 1;
+}
 
 void CBM1541::execute() {
     //char in = 's';

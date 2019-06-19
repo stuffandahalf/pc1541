@@ -12,6 +12,7 @@
 using namespace std;
 
 int configure(int argc, char **argv, struct config *cfg);
+void printHelp();
 
 int main(int argc, char **argv)
 {
@@ -23,18 +24,27 @@ int main(int argc, char **argv)
         .devPath = nullptr,
         .baud = 115200
     };
-    if (configure(argc, argv, &cfg) < 0) {
-        std::cerr << "Failed to configure pc1541" << std::endl;
+    int configureState = configure(argc, argv, &cfg);
+    if (configureState <= 0) {
         if (cfg.devPath != nullptr) {
             delete cfg.devPath;
         }
         if (cfg.firmware.data != nullptr) {
             delete[] cfg.firmware.data;
         }
-        return 1;
+        if (configureState < 0) {
+            std::cerr << "Failed to configure pc1541" << std::endl;
+            return 1;
+        }
+        return 0;
     }
     
+    
     CBM1541 *drive = new CBM1541(cfg);
+    if (drive->initialize() < 0) {
+        delete drive;
+        return 1;
+    }
     drive->execute();
     delete drive;
     
@@ -56,12 +66,13 @@ int configure(int argc, char **argv, struct config *cfg) {
         { "device", required_argument, 0, 'd' },
         { "baud", required_argument, 0, 'b' },
         { "firmware", required_argument, 0, 'f' },
+        { "help", no_argument, 0, 'h' },
         { 0, 0, 0, 0 }
     };
 
-    while ((opt = getopt_long(argc, argv, "d:b:f:", long_opts, 0)) != -1) {
+    while ((opt = getopt_long(argc, argv, "d:b:f:h", long_opts, 0)) != -1) {
 #else
-    while ((opt = getopt(argc, argv, "d:b:f:")) != -1) {
+    while ((opt = getopt(argc, argv, "d:b:f:h")) != -1) {
 #endif
         switch (opt) {
         case 'd':
@@ -107,6 +118,10 @@ int configure(int argc, char **argv, struct config *cfg) {
             delete firmwareStream;
             firmwareStream = nullptr;
             break;
+        case 'h':
+            printHelp();
+            return 0;
+            break;
         default:
             return -1;
         }
@@ -117,4 +132,41 @@ int configure(int argc, char **argv, struct config *cfg) {
     }
     
     return 1;
+}
+
+void printHelp() {
+    cout
+        << "Commodore Business Machines floppy drive emulator"
+        << endl
+        << "Written by Gregory Norton [Gregory.Norton@me.com]"
+        << endl
+        << endl
+        
+        << "\t-d\t"
+#ifdef _GNU_SOURCE
+        << "--device\t"
+#endif
+        << "The serial port where the interface is connected."
+        << endl
+        
+        << "\t-b\t"
+#ifdef _GNU_SOURCE
+        << "--baud\t"
+#endif
+        << "Select the baud rate of the serial connection to the interface."
+        << endl
+        
+        << "\t-f\t"
+#ifdef _GNU_SOURCE
+        << "--firmware\t"
+#endif
+        << "Path to the original commodore drive firmware."
+        << endl
+        
+        << "\t-h\t"
+#ifdef _GNU_SOURCE
+        << "--help\t"
+#endif
+        << "Print this help message."
+        << endl;
 }
