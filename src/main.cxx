@@ -15,8 +15,7 @@ int configure(int argc, char **argv, struct config *cfg);
 void printHelp();
 void deleteConfig(struct config *cfg);
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     struct config cfg {
         .firmware = {
             .size = 0,

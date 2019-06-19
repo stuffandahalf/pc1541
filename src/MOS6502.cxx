@@ -569,6 +569,8 @@ inline void MOS6502::ASL(MOS6502::AddressMode addressMode, ...) {
     
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ACCUMULATOR:
+    case AddressMode::ABSOLUTE:
         val = va_arg(args, uint8_t *);
         break;
     }
@@ -589,6 +591,8 @@ inline void MOS6502::ROL(MOS6502::AddressMode addressMode, ...) {
     
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ACCUMULATOR:
+    case AddressMode::ABSOLUTE:
         val = va_arg(args, uint8_t *);
         break;
     }
@@ -612,6 +616,8 @@ inline void MOS6502::LSR(MOS6502::AddressMode addressMode, ...) {
     
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ACCUMULATOR:
+    case AddressMode::ABSOLUTE:
         val = va_arg(args, uint8_t *);
         break;
     }
@@ -631,6 +637,8 @@ inline void MOS6502::ROR(MOS6502::AddressMode addressMode, ...) {
     
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ACCUMULATOR:
+    case AddressMode::ABSOLUTE:
         val = va_arg(args, uint8_t *);
         break;
     }
@@ -653,6 +661,7 @@ inline void MOS6502::STX(MOS6502::AddressMode addressMode, ...) {
     
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ABSOLUTE:
         address = (uint16_t)va_arg(args, int);
         break;
     }
@@ -669,6 +678,7 @@ inline void MOS6502::LDX(MOS6502::AddressMode addressMode, ...) {
     
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ABSOLUTE:
         val = this->addrSpace.r8((uint16_t)va_arg(args, int));
         break;
     }
@@ -687,6 +697,7 @@ inline void MOS6502::DEC(MOS6502::AddressMode addressMode, ...) {
     
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ABSOLUTE:
         val = va_arg(args, uint8_t *);
         break;
     }
@@ -705,6 +716,7 @@ inline void MOS6502::INC(MOS6502::AddressMode addressMode, ...) {
     
     switch (addressMode) {
     case AddressMode::ZERO_PAGE:
+    case AddressMode::ABSOLUTE:
         val = va_arg(args, uint8_t *);
         break;
     }
@@ -919,18 +931,63 @@ void MOS6502::cycle() {
                     this->counter = 0;
                     break;
                 }
+                break;
             }
             break;
         case 0b010: // accumulator
             switch (this->counter) {
             case 1:
-                
+                (this->*(operations[instructionGroup][instruction]))(AddressMode::ACCUMULATOR, &this->A);
                 break;
             case 2:
+                this->IR = this->addrSpace.r8(this->PC++);
+                this->counter = 0;
                 break;
             }
             break;
         case 0b011: // absolute
+            switch (instruction >> 1) {
+            case 0b10:  // STX and LDX
+                switch (this->counter) {
+                case 1:
+                    tmp[0] = this->addrSpace.r8(this->PC++);    // target address low
+                    break;
+                case 2:
+                    tmp[1] = this->addrSpace.r8(this->PC++);    // target address high
+                    break;
+                case 3:
+                    (this->*(operations[instructionGroup][instruction]))(AddressMode::ABSOLUTE, (tmp[1] << 8) + tmp[0]);
+                    break;
+                case 4:
+                    this->IR = this->addrSpace.r8(this->PC++);
+                    this->counter = 0;
+                    break;
+                }
+                break;
+            default:
+                switch (this->counter) {
+                case 1:
+                    tmp[0] = this->addrSpace.r8(this->PC++);    // target address low
+                    break;
+                case 2:
+                    tmp[1] = this->addrSpace.r8(this->PC++);    // target address high
+                    break;
+                case 3:
+                    tmp[2] = this->addrSpace.r8((tmp[1] << 8) + tmp[0]);
+                    break;
+                case 4:
+                    (this->*(operations[instructionGroup][instruction]))(AddressMode::ABSOLUTE, &tmp[2]);
+                    break;
+                case 5:
+                    this->addrSpace.w8((tmp[1] << 8) + tmp[0], tmp[2]);
+                    break;
+                case 6:
+                    this->IR = this->addrSpace.r8(this->PC++);
+                    this->counter = 0;
+                    break;
+                }
+                break;
+            }
             break;
         case 0b101: // zero page, x
             break;
