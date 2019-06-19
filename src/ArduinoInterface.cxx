@@ -16,8 +16,16 @@ ArduinoInterface::~ArduinoInterface() {
     }
 }
 
+bool ArduinoInterface::isOpen() {
+    return this->fd >= 0;
+}
+
 // Logic from https://stackoverflow.com/questions/31663776/ubuntu-c-termios-h-example-program
 int ArduinoInterface::open() {
+    if (this->isOpen()) {
+        return 0;
+    }
+    
     this->fd = ::open(this->devPath.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
     if (this->fd < 0) {
         std::cerr << "Failed to open serial device." << std::endl;

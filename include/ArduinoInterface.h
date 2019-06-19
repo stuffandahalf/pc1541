@@ -22,6 +22,7 @@ public:
     ~ArduinoInterface();
     
     void write(const char *str, std::size_t count);
+    bool isOpen();
     int open();
     void close();
     virtual void cycle() override;

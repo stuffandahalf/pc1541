@@ -13,6 +13,7 @@ using namespace std;
 
 int configure(int argc, char **argv, struct config *cfg);
 void printHelp();
+void deleteConfig(struct config *cfg);
 
 int main(int argc, char **argv)
 {
@@ -26,12 +27,7 @@ int main(int argc, char **argv)
     };
     int configureState = configure(argc, argv, &cfg);
     if (configureState <= 0) {
-        if (cfg.devPath != nullptr) {
-            delete cfg.devPath;
-        }
-        if (cfg.firmware.data != nullptr) {
-            delete[] cfg.firmware.data;
-        }
+        deleteConfig(&cfg);
         if (configureState < 0) {
             std::cerr << "Failed to configure pc1541" << std::endl;
             return 1;
@@ -43,10 +39,13 @@ int main(int argc, char **argv)
     CBM1541 *drive = new CBM1541(cfg);
     if (drive->initialize() < 0) {
         delete drive;
+        deleteConfig(&cfg);
         return 1;
     }
     drive->execute();
     delete drive;
+    
+    deleteConfig(&cfg);
     
     /*ArduinoInterface *iface = new ArduinoInterface(*cfg.devPath, cfg.baud);
     iface->open();
@@ -169,4 +168,13 @@ void printHelp() {
 #endif
         << "Print this help message."
         << endl;
+}
+
+void deleteConfig(struct config *cfg) {
+    if (cfg->devPath != nullptr) {
+        delete cfg->devPath;
+    }
+    if (cfg->firmware.data != nullptr) {
+        delete[] cfg->firmware.data;
+    }
 }

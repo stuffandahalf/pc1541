@@ -18,8 +18,11 @@ CBM1541::CBM1541(struct config& cfg) {
 }
 
 CBM1541::~CBM1541() {
-    this->interface->close();
+    if (this->interface->isOpen()) {
+        this->interface->close();
+    }
     
+    delete this->interface;
     delete this->motorHeadVia;
     delete this->serialVia;
     delete this->cpu;
