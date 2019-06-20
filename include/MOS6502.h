@@ -8,7 +8,6 @@
 #include "Memory.h"
 #include "IClockable.h"
 
-#define DEBUG
 #define addrout(addr) std::cout << std::hex << (addr) << std::dec << std::endl
 
 class MOS6502 : IClockable {
@@ -71,7 +70,13 @@ public:
     friend std::ostream& operator <<(std::ostream& os, const MOS6502& cpu);
     
 private:
-    
+    void BIT(AddressMode addressMode, ...);
+    void JMP_INDIRECT(AddressMode addressMode, ...);
+    void JMP_ABSOLUTE(AddressMode addressMode, ...);
+    void STY(AddressMode addressMode, ...);
+    void LDY(AddressMode addressMode, ...);
+    void CPY(AddressMode addressMode, ...);
+    void CPX(AddressMode addressMode, ...);
 
     void ORA(AddressMode addressMode, ...);
     void AND(AddressMode addressMode, ...);
