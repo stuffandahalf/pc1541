@@ -19,12 +19,12 @@ private:
     uint8_t SP;     // Stack pointer
     uint16_t PC;      // Program counter
     uint8_t P;      // Processor flags
-    
+
     AddressSpace& addrSpace;
-    
+
     uint8_t counter;    // remaining cycles for opcode
     size_t cycles;      // total executed cycles since reset
-    
+
 public:
     enum class Vectors : uint16_t {
         NMI = 0xFFFA,
@@ -43,7 +43,7 @@ public:
         OVERFLOW = 64,
         NEGATIVE = 128
     };
-    
+
     enum class AddressMode {
         ACCUMULATOR,
         IMMEDIATE,
@@ -56,87 +56,90 @@ public:
         ABSOLUTE_Y,
         INDIRECT,
         INDEXED_INDIRECT,
-        INDIRECT_INDEXED
+        INDIRECT_INDEXED,
+        IMPLIED
     };
 
     MOS6502(AddressSpace *addrSpace);
 
     void reset();
     void step();
-    virtual void cycle() override;
+    virtual int cycle() override;
     bool checkFlag(Flags f) const;
     bool setFlag(bool condition, Flags f);
-    
+    inline uint8_t getCounter() { return this->counter; }
+
     friend std::ostream& operator <<(std::ostream& os, const MOS6502& cpu);
-    
+
 private:
-    void BIT(AddressMode addressMode, ...);
-    void JMP_INDIRECT(AddressMode addressMode, ...);
-    void JMP_ABSOLUTE(AddressMode addressMode, ...);
-    void STY(AddressMode addressMode, ...);
-    void LDY(AddressMode addressMode, ...);
-    void CPY(AddressMode addressMode, ...);
-    void CPX(AddressMode addressMode, ...);
+    int BIT(AddressMode addressMode, ...);
+    int JMP_INDIRECT(AddressMode addressMode, ...);
+    int JMP_ABSOLUTE(AddressMode addressMode, ...);
+    int STY(AddressMode addressMode, ...);
+    int LDY(AddressMode addressMode, ...);
+    int CPY(AddressMode addressMode, ...);
+    int CPX(AddressMode addressMode, ...);
 
-    void ORA(AddressMode addressMode, ...);
-    void AND(AddressMode addressMode, ...);
-    void EOR(AddressMode addressMode, ...);
-    void ADC(AddressMode addressMode, ...);
-    void STA(AddressMode addressMode, ...);
-    void LDA(AddressMode addressMode, ...);
-    void CMP(AddressMode addressMode, ...);
-    void SBC(AddressMode addressMode, ...);
-    
-    void ASL(AddressMode addressMode, ...);
-    void ROL(AddressMode addressMode, ...);
-    void LSR(AddressMode addressMode, ...);
-    void ROR(AddressMode addressMode, ...);
-    void STX(AddressMode addressMode, ...);
-    void LDX(AddressMode addressMode, ...);
-    void DEC(AddressMode addressMode, ...);
-    void INC(AddressMode addressMode, ...);
-    
-    void BRK(AddressMode addressMode, ...);
-    void JSR(AddressMode addressMode, ...);
-    void RTI(AddressMode addressMode, ...);
-    void RTS(AddressMode addressMode, ...);
-    
-    void PHP(AddressMode addressMode, ...);
-    void PLP(AddressMode addressMode, ...);
-    void PHA(AddressMode addressMode, ...);
-    void PLA(AddressMode addressMode, ...);
-    void DEY(AddressMode addressMode, ...);
-    void TAY(AddressMode addressMode, ...);
-    void INY(AddressMode addressMode, ...);
-    void INX(AddressMode addressMode, ...);
-    
-    void CLC(AddressMode addressMode, ...);
-    void SEC(AddressMode addressMode, ...);
-    void CLI(AddressMode addressMode, ...);
-    void SEI(AddressMode addressMode, ...);
-    void TYA(AddressMode addressMode, ...);
-    void CLV(AddressMode addressMode, ...);
-    void CLD(AddressMode addressMode, ...);
-    void SED(AddressMode addressMode, ...);
-    
-    void TXA(AddressMode addressMode, ...);
-    void TXS(AddressMode addressMode, ...);
-    void TAX(AddressMode addressMode, ...);
-    void TSX(AddressMode addressMode, ...);
-    void DEX(AddressMode addressMode, ...);
-    void NOP(AddressMode addressMode, ...);
-    
-    void BPL(AddressMode addressMode, ...);
-    void BMI(AddressMode addressMode, ...);
-    void BVC(AddressMode addressMode, ...);
-    void BVS(AddressMode addressMode, ...);
-    void BCC(AddressMode addressMode, ...);
-    void BCS(AddressMode addressMode, ...);
-    void BNE(AddressMode addressMode, ...);
-    void BEQ(AddressMode addressMode, ...);
+    int ORA(AddressMode addressMode, ...);
+    int AND(AddressMode addressMode, ...);
+    int EOR(AddressMode addressMode, ...);
+    int ADC(AddressMode addressMode, ...);
+    int STA(AddressMode addressMode, ...);
+    int LDA(AddressMode addressMode, ...);
+    int CMP(AddressMode addressMode, ...);
+    int SBC(AddressMode addressMode, ...);
 
-    typedef void (MOS6502::*operation_t)(MOS6502::AddressMode addressMode, ...);
+    int ASL(AddressMode addressMode, ...);
+    int ROL(AddressMode addressMode, ...);
+    int LSR(AddressMode addressMode, ...);
+    int ROR(AddressMode addressMode, ...);
+    int STX(AddressMode addressMode, ...);
+    int LDX(AddressMode addressMode, ...);
+    int DEC(AddressMode addressMode, ...);
+    int INC(AddressMode addressMode, ...);
+
+    int BRK(AddressMode addressMode, ...);
+    int JSR(AddressMode addressMode, ...);
+    int RTI(AddressMode addressMode, ...);
+    int RTS(AddressMode addressMode, ...);
+
+    int PHP(AddressMode addressMode, ...);
+    int PLP(AddressMode addressMode, ...);
+    int PHA(AddressMode addressMode, ...);
+    int PLA(AddressMode addressMode, ...);
+    int DEY(AddressMode addressMode, ...);
+    int TAY(AddressMode addressMode, ...);
+    int INY(AddressMode addressMode, ...);
+    int INX(AddressMode addressMode, ...);
+
+    int CLC(AddressMode addressMode, ...);
+    int SEC(AddressMode addressMode, ...);
+    int CLI(AddressMode addressMode, ...);
+    int SEI(AddressMode addressMode, ...);
+    int TYA(AddressMode addressMode, ...);
+    int CLV(AddressMode addressMode, ...);
+    int CLD(AddressMode addressMode, ...);
+    int SED(AddressMode addressMode, ...);
+
+    int TXA(AddressMode addressMode, ...);
+    int TXS(AddressMode addressMode, ...);
+    int TAX(AddressMode addressMode, ...);
+    int TSX(AddressMode addressMode, ...);
+    int DEX(AddressMode addressMode, ...);
+    int NOP(AddressMode addressMode, ...);
+
+    int BPL(AddressMode addressMode, ...);
+    int BMI(AddressMode addressMode, ...);
+    int BVC(AddressMode addressMode, ...);
+    int BVS(AddressMode addressMode, ...);
+    int BCC(AddressMode addressMode, ...);
+    int BCS(AddressMode addressMode, ...);
+    int BNE(AddressMode addressMode, ...);
+    int BEQ(AddressMode addressMode, ...);
+
+    typedef int (MOS6502::*operation_t)(MOS6502::AddressMode addressMode, ...);
     operation_t operations[3][8];
+    operation_t flagOps[8];
 };
 
 #endif

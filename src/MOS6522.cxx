@@ -12,6 +12,6 @@ Registers& MOS6522::getRegisters() {
     return *this->regs;
 }
 
-void MOS6522::cycle() {
-    
+int MOS6522::cycle() {
+    return 1;
 }

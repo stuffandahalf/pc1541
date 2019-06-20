@@ -3,7 +3,7 @@
 
 class IClockable {
 public:
-    virtual void cycle() = 0;
+    virtual int cycle() = 0;
     virtual ~IClockable() { }
 };
 

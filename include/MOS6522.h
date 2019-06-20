@@ -28,16 +28,16 @@ public:
         IER   = 15,
         ORAX  = 16
     };
-    
+
 private:
     Registers *regs;
-    
+
 public:
     MOS6522();
     ~MOS6522();
-    
+
     Registers& getRegisters();
-    virtual void cycle() override;
+    virtual int cycle() override;
 };
 
 #endif
