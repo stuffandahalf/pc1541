@@ -95,9 +95,48 @@ private:
     void LDX(AddressMode addressMode, ...);
     void DEC(AddressMode addressMode, ...);
     void INC(AddressMode addressMode, ...);
+    
+    void BRK(AddressMode addressMode, ...);
+    void JSR(AddressMode addressMode, ...);
+    void RTI(AddressMode addressMode, ...);
+    void RTS(AddressMode addressMode, ...);
+    
+    void PHP(AddressMode addressMode, ...);
+    void PLP(AddressMode addressMode, ...);
+    void PHA(AddressMode addressMode, ...);
+    void PLA(AddressMode addressMode, ...);
+    void DEY(AddressMode addressMode, ...);
+    void TAY(AddressMode addressMode, ...);
+    void INY(AddressMode addressMode, ...);
+    void INX(AddressMode addressMode, ...);
+    
+    void CLC(AddressMode addressMode, ...);
+    void SEC(AddressMode addressMode, ...);
+    void CLI(AddressMode addressMode, ...);
+    void SEI(AddressMode addressMode, ...);
+    void TYA(AddressMode addressMode, ...);
+    void CLV(AddressMode addressMode, ...);
+    void CLD(AddressMode addressMode, ...);
+    void SED(AddressMode addressMode, ...);
+    
+    void TXA(AddressMode addressMode, ...);
+    void TXS(AddressMode addressMode, ...);
+    void TAX(AddressMode addressMode, ...);
+    void TSX(AddressMode addressMode, ...);
+    void DEX(AddressMode addressMode, ...);
+    void NOP(AddressMode addressMode, ...);
+    
+    void BPL(AddressMode addressMode, ...);
+    void BMI(AddressMode addressMode, ...);
+    void BVC(AddressMode addressMode, ...);
+    void BVS(AddressMode addressMode, ...);
+    void BCC(AddressMode addressMode, ...);
+    void BCS(AddressMode addressMode, ...);
+    void BNE(AddressMode addressMode, ...);
+    void BEQ(AddressMode addressMode, ...);
 
     typedef void (MOS6502::*operation_t)(MOS6502::AddressMode addressMode, ...);
-    operation_t operations[4][8];
+    operation_t operations[3][8];
 };
 
 #endif
