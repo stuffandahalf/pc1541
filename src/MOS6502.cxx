@@ -941,6 +941,8 @@ inline int MOS6502::BIT(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE:
         val = (uint8_t)va_arg(args, uint32_t);
         break;
+    default:
+        return -1;
     }
 
     result = this->A & val;
@@ -997,6 +999,8 @@ inline int MOS6502::STY(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ZERO_PAGE_X:
         addr = (uint16_t)va_arg(args, uint32_t);
         break;
+    default:
+        return -1;
     }
 
     this->addrSpace.w8(addr, this->Y);
@@ -1019,6 +1023,8 @@ inline int MOS6502::LDY(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE_X:
         addr = (uint16_t)va_arg(args, uint32_t);
         break;
+    default:
+        return -1;
     }
 
     this->Y = this->addrSpace.r8(addr);
@@ -1043,6 +1049,8 @@ inline int MOS6502::CPY(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE:
         addr = (uint16_t)va_arg(args, uint32_t);
         break;
+    default:
+        return -1;
     }
 
     var = this->addrSpace.r8(addr);
@@ -1067,6 +1075,8 @@ inline int MOS6502::CPX(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE:
         addr = (uint16_t)va_arg(args, uint32_t);
         break;
+    default:
+        return -1;
     }
 
     var = this->addrSpace.r8(addr);
@@ -1100,8 +1110,8 @@ inline int MOS6502::ORA(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::INDEXED_INDIRECT:
         var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
-    //default:
-        // die
+    default:
+        return -1;
     }
 
     va_end(args);
@@ -1131,6 +1141,8 @@ inline int MOS6502::AND(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::INDEXED_INDIRECT:
         var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
+    default:
+        return -1;
     }
 
     va_end(args);
@@ -1160,6 +1172,8 @@ inline int MOS6502::EOR(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::INDEXED_INDIRECT:
         var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
+    default:
+        return -1;
     }
 
     va_end(args);
@@ -1189,6 +1203,8 @@ inline int MOS6502::ADC(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::INDEXED_INDIRECT:
         var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
+    default:
+        return -1;
     }
 
     va_end(args);
@@ -1217,6 +1233,8 @@ inline int MOS6502::STA(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::INDEXED_INDIRECT:
         targetAddr = (uint16_t)va_arg(args, uint);
         break;
+    default:
+        return -1;
     }
 
     va_end(args);
@@ -1244,6 +1262,8 @@ inline int MOS6502::LDA(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::INDEXED_INDIRECT:
         var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
+    default:
+        return -1;
     }
 
     va_end(args);
@@ -1273,6 +1293,8 @@ inline int MOS6502::CMP(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::INDEXED_INDIRECT:
         var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
+    default:
+        return -1;
     }
 
     va_end(args);
@@ -1302,6 +1324,8 @@ inline int MOS6502::SBC(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::INDEXED_INDIRECT:
         var = this->addrSpace.r8((uint16_t)va_arg(args, uint));
         break;
+    default:
+        return -1;
     }
 
     va_end(args);
@@ -1330,6 +1354,8 @@ inline int MOS6502::ASL(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE_X:
         val = va_arg(args, uint8_t *);
         break;
+    default:
+        return -1;
     }
 
     this->setFlag(*val & 0x80, Flags::CARRY);
@@ -1356,6 +1382,8 @@ inline int MOS6502::ROL(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE_X:
         val = va_arg(args, uint8_t *);
         break;
+    default:
+        return -1;
     }
 
     uint8_t oldVal = *val;
@@ -1385,6 +1413,8 @@ inline int MOS6502::LSR(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE_X:
         val = va_arg(args, uint8_t *);
         break;
+    default:
+        return -1;
     }
 
     this->setFlag(*val & 1, Flags::CARRY);
@@ -1410,6 +1440,8 @@ inline int MOS6502::ROR(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE_X:
         val = va_arg(args, uint8_t *);
         break;
+    default:
+        return -1;
     }
 
     uint8_t oldVal = *val;
@@ -1460,6 +1492,8 @@ inline int MOS6502::LDX(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE_Y:
         val = this->addrSpace.r8((uint16_t)va_arg(args, int));
         break;
+    default:
+        return -1;
     }
 
     this->X = val;
@@ -1483,6 +1517,8 @@ inline int MOS6502::DEC(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE_X:
         val = va_arg(args, uint8_t *);
         break;
+    default:
+        return -1;
     }
 
     (*val)--;
@@ -1506,6 +1542,8 @@ inline int MOS6502::INC(MOS6502::AddressMode addressMode, ...) {
     case AddressMode::ABSOLUTE_X:
         val = va_arg(args, uint8_t *);
         break;
+    default:
+        return -1;
     }
 
     (*val)++;
