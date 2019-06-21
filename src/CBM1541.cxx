@@ -47,11 +47,12 @@ void CBM1541::execute() {
     std::cout << *this->cpu << std::endl;
     for (;;) {
         // load data from arduino into serial via port
-        /*this->cpu->step();
-        std::cout << *this->cpu << std::endl;*/
+        this->cpu->step();
+        cout << *this->cpu << endl;
+        //std::cout << *this->cpu << std::endl;
         //std::cin >> in;
 
-        if (this->cpu->cycle() < 0) {
+        /*if (this->cpu->cycle() < 0) {
             cerr << "CPU encountered an invalid instruction." << endl;
             break;
         }
@@ -59,7 +60,7 @@ void CBM1541::execute() {
         if (this->cpu->getCounter() == 1) {
             cout << *this->cpu << endl;
         }
-#endif
+#endif*/
         //if (this->)
 
     }

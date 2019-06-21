@@ -333,7 +333,7 @@ void MOS6502::reset() {
     uint16_t start = 0;
     start |= this->addrSpace.r8(this->PC++);
     start |= this->addrSpace.r8(this->PC) << 8;
-    printf("%X\n", start);
+    //printf("%X\n", start);
     this->PC = start;
 
     this->P |= (uint8_t)Flags::IRQ;
@@ -396,7 +396,7 @@ int MOS6502::cycle() {
     uint8_t addressMode = 0;
     uint8_t instruction = 0;
 
-    instructionGroup = this->IR & 0x2;
+    instructionGroup = this->IR & 0x3;
     addressMode = (this->IR & 0x1C) >> 2;
     instruction = (this->IR & 0xE0) >> 5;
 
@@ -425,6 +425,15 @@ int MOS6502::cycle() {
     case 0xC8:  // INY
         break;
     case 0xE8:  // INX
+        switch (this->counter) {
+        case 1:
+            this->INX(AddressMode::IMPLIED);
+            break;
+        case 2:
+            this->IR = this->addrSpace.r8(this->PC++);
+            this->counter = 0;
+            break;
+        }
         break;
 
     case 0x18:  // CLC
@@ -449,6 +458,7 @@ int MOS6502::cycle() {
         break;
 
     case 0x8A:  // TXA
+        // THIS IS NEXT
         break;
     case 0x9A:  // TXS
         break;
@@ -462,7 +472,7 @@ int MOS6502::cycle() {
         break;
     default:
         switch (this->IR & 0x1F) {
-        case 0x1000:
+        case 0x10000:
             switch (this->IR >> 5) {
             case 0b000:
                 break;
@@ -558,6 +568,7 @@ int MOS6502::cycle() {
                         break;
                     case 5:
                         // Forgive me father for I have sinned
+                        exit(1);
                         if ((this->*(this->operations[instructionGroup][instruction]))(AddressMode::INDEXED_INDIRECT, (tmp[2] << 8) + tmp[1]) < 0) {
                             return -1;
                         }
@@ -982,6 +993,8 @@ inline int MOS6502::JMP_ABSOLUTE(MOS6502::AddressMode addressMode, ...) {
     default:
         return -1;
     }
+    
+    this->PC = (uint16_t)va_arg(args, uint32_t);
 
     va_end(args);
     return 1;
