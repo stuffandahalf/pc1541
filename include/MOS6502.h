@@ -139,6 +139,7 @@ private:
 
     typedef int (MOS6502::*operation_t)(MOS6502::AddressMode addressMode, ...);
     operation_t operations[3][8];
+    operation_t branchOps[8];
     operation_t flagOps[8];
     operation_t lowNibbleAOps[6];
     operation_t lowNibbleEightHighEvenTwoCycleOps[4];

@@ -3,298 +3,6 @@
 #include <cstdarg>
 
 typedef unsigned int uint;
-/*typedef Instruction i_t;
-static Instruction instructions[16][16] = {
-    { // 0x0*
-        { "BRK", 0x00, 1, 7,  i_t::CycleMod::NONE },
-        { "ORA", 0x01, 2, 6,  i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "ORA", 0x05, 2, 3, i_t::CycleMod::NONE },
-        { "ASL", 0x06, 2, 5, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "PHP", 0x08, 1, 3, i_t::CycleMod::NONE },
-        { "ORA", 0x09, 2, 2, i_t::CycleMod::NONE },
-        { "ASL", 0x0A, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "ORA", 0x0D, 3, 4, i_t::CycleMod::NONE },
-        { "ASL", 0x0E, 3, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0x1*
-        { "BPL", 0x10, 2, 2, i_t::CycleMod::MOD2 },
-        { "ORA", 0x11, 2, 5, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "ORA", 0x15, 2, 4, i_t::CycleMod::NONE },
-        { "ASL", 0x16, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CLC", 0x18, 1, 2, i_t::CycleMod::NONE },
-        { "ORA", 0x19, 3, 4, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "ORA", 0x1D, 3, 4, i_t::CycleMod::MOD1 },
-        { "ASL", 0x1E, 3, 7, i_t::CycleMod:: NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0x2*
-        { "JSR", 0x20, 3, 6, i_t::CycleMod::NONE },
-        { "AND", 0x21, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "BIT", 0x24, 2, 3, i_t::CycleMod::NONE },
-        { "AND", 0x25, 2, 3, i_t::CycleMod::NONE },
-        { "ROL", 0x26, 2, 5, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "PLP", 0x28, 1, 4, i_t::CycleMod::NONE },
-        { "AND", 0x29, 2, 2, i_t::CycleMod::NONE },
-        { "ROL", 0x2A, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "BIT", 0x2C, 3, 4, i_t::CycleMod::NONE },
-        { "AND", 0x2D, 3, 4, i_t::CycleMod::NONE },
-        { "ROL", 0x2E, 3, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0x3*
-        { "BMI", 0x30, 2, 2, i_t::CycleMod::MOD2 },
-        { "AND", 0x31, 2, 5, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "AND", 0x35, 2, 4, i_t::CycleMod::NONE },
-        { "ROL", 0x36, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "SEC", 0x38, 1, 2, i_t::CycleMod::NONE },
-        { "AND", 0x39, 3, 4, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "AND", 0x3D, 3, 4, i_t::CycleMod::MOD1 },
-        { "ROL", 0x3E, 3, 7, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0x4*
-        { "RTI", 0x40, 1, 6, i_t::CycleMod::NONE },
-        { "EOR", 0x41, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "EOR", 0x45, 2, 3, i_t::CycleMod::NONE },
-        { "LSR", 0x46, 2, 5, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "PHA", 0x48, 1, 3, i_t::CycleMod::NONE },
-        { "EOR", 0x49, 2, 2, i_t::CycleMod::NONE },
-        { "LSR", 0x4A, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "JMP", 0x4C, 3, 3, i_t::CycleMod::NONE },
-        { "EOR", 0x4D, 3, 4, i_t::CycleMod::NONE },
-        { "LSR", 0x4E, 3, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0x5*
-        { "BVC", 0x50, 2, 2, i_t::CycleMod::MOD2 },
-        { "EPR", 0x51, 2, 5, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "EOR", 0x55, 2, 4, i_t::CycleMod::NONE },
-        { "LSR", 0x56, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CLI", 0x58, 1, 2, i_t::CycleMod::NONE },
-        { "EOR", 0x59, 3, 4, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "EOR", 0x5D, 3, 4, i_t::CycleMod::MOD1 },
-        { "LSR", 0x5E, 3, 7, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-    },
-    { // 0x6*
-        { "RTS", 0x60, 1, 6, i_t::CycleMod::NONE },
-        { "ADC", 0x61, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "ADC", 0x65, 2, 3, i_t::CycleMod::NONE },
-        { "ROR", 0x66, 2, 5, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "PLA", 0x68, 1, 4, i_t::CycleMod::NONE },
-        { "ADC", 0x69, 2, 2, i_t::CycleMod::NONE },
-        { "ROR", 0x6A, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "JMP", 0x6C, 3, 5, i_t::CycleMod::NONE },
-        { "ADC", 0x6D, 3, 4, i_t::CycleMod::NONE },
-        { "ROR", 0x6E, 3, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0x7*
-        { "BVS", 0x70, 2, 2, i_t::CycleMod::MOD2 },
-        { "ADC", 0x71, 2, 5, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 0, i_t::CycleMod::NONE },
-        { "ADC", 0x75, 2, 4, i_t::CycleMod::NONE },
-        { "ROR", 0x76, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "SEI", 0x78, 1, 2, i_t::CycleMod::NONE },
-        { "ADC", 0x79, 3, 4, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "ADC", 0x7D, 3, 4, i_t::CycleMod::MOD1 },
-        { "ROR", 0x7E, 3, 7, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0x8*
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "STA", 0x81, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "STY", 0x84, 2, 3, i_t::CycleMod::NONE },
-        { "STA", 0x85, 2, 3, i_t::CycleMod::NONE },
-        { "STX", 0x86, 2, 3, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "DEY", 0x88, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "TXA", 0x8A, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "STY", 0x8C, 3, 4, i_t::CycleMod::NONE },
-        { "STA", 0x8D, 3, 4, i_t::CycleMod::NONE },
-        { "STX", 0x8E, 3, 4, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0x9*
-        { "BCC", 0x90, 2, 2, i_t::CycleMod::MOD2 },
-        { "STA", 0x91, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "STY", 0x94, 2, 4, i_t::CycleMod::NONE },
-        { "STA", 0x95, 2, 4, i_t::CycleMod::NONE },
-        { "STX", 0x96, 2, 4, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "TYA", 0x98, 1, 2, i_t::CycleMod::NONE },
-        { "STA", 0x99, 3, 5, i_t::CycleMod::NONE },
-        { "TXS", 0x9A, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "STA", 0x9D, 3, 5, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0xA*
-        { "LDY", 0xA0, 2, 2, i_t::CycleMod::NONE },
-        { "LDA", 0xA1, 2, 6, i_t::CycleMod::NONE },
-        { "LDX", 0xA2, 2, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "LDY", 0xA4, 2, 3, i_t::CycleMod::NONE },
-        { "LDA", 0xA5, 2, 3, i_t::CycleMod::NONE },
-        { "LDX", 0xA6, 2, 3, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "TAY", 0xA8, 1, 2, i_t::CycleMod::NONE },
-        { "LDA", 0xA9, 2, 2, i_t::CycleMod::NONE },
-        { "TAX", 0xAA, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "LDY", 0xAC, 3, 4, i_t::CycleMod::NONE },
-        { "LDA", 0xAD, 3, 4, i_t::CycleMod::NONE },
-        { "LDX", 0xAE, 3, 4, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0xB*
-        { "BCS", 0xB0, 2, 2, i_t::CycleMod::MOD2 },
-        { "LDA", 0xB1, 2, 5, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "LDY", 0xB4, 2, 4, i_t::CycleMod::NONE },
-        { "LDA", 0xB5, 2, 4, i_t::CycleMod::NONE },
-        { "LDX", 0xB6, 2, 4, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CLV", 0xB8, 1, 2, i_t::CycleMod::NONE },
-        { "LDA", 0xB9, 3, 4, i_t::CycleMod::MOD1 },
-        { "TSX", 0xBA, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "LDY", 0xBC, 3, 4, i_t::CycleMod::MOD1 },
-        { "LDA", 0xBD, 3, 4, i_t::CycleMod::MOD1 },
-        { "LDX", 0xBE, 3, 4, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0xC*
-        { "CPY", 0xC0, 2, 2, i_t::CycleMod::NONE },
-        { "CMP", 0xC1, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CPY", 0xC4, 2, 3, i_t::CycleMod::NONE },
-        { "CMP", 0xC5, 2, 3, i_t::CycleMod::NONE },
-        { "DEC", 0xC6, 2, 5, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INY", 0xC8, 1, 2, i_t::CycleMod::NONE },
-        { "CMP", 0xC9, 2, 2, i_t::CycleMod::NONE },
-        { "INY", 0xCA, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CPY", 0xCC, 3, 4, i_t::CycleMod::NONE },
-        { "CMP", 0xCD, 3, 4, i_t::CycleMod::NONE },
-        { "DEC", 0xCD, 3, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0xD*
-        { "BNE", 0xD0, 2, 2, i_t::CycleMod::MOD2 },
-        { "CMP", 0xD1, 2, 5, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CMP", 0xD5, 2, 4, i_t::CycleMod::NONE },
-        { "DEC", 0xD6, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CLD", 0xD8, 1, 2, i_t::CycleMod::NONE },
-        { "CMP", 0xD9, 3, 4, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CMP", 0xDD, 3, 4, i_t::CycleMod::MOD1 },
-        { "DEC", 0xDE, 3, 7, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0xE*
-        { "CPX", 0xE0, 2, 2, i_t::CycleMod::NONE },
-        { "SBC", 0xE1, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CPX", 0xE4, 2, 3, i_t::CycleMod::NONE },
-        { "SBC", 0xE5, 2, 3, i_t::CycleMod::NONE },
-        { "INC", 0xE6, 2, 5, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INX", 0xE8, 1, 2, i_t::CycleMod::NONE },
-        { "SBC", 0xE9, 2, 2, i_t::CycleMod::NONE },
-        { "NOP", 0xEA, 1, 2, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "CPX", 0xE4, 3, 4, i_t::CycleMod::NONE },
-        { "SBC", 0xE5, 3, 4, i_t::CycleMod::NONE },
-        { "INC", 0xE6, 3, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    },
-    { // 0xF*
-        { "BEQ", 0xF0, 2, 2, i_t::CycleMod::MOD2 },
-        { "SBC", 0xF1, 2, 5, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "SBC", 0xF5, 2, 4, i_t::CycleMod::NONE },
-        { "INC", 0xF6, 2, 6, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "SED", 0xF8, 1, 2, i_t::CycleMod::NONE },
-        { "SBC", 0xF9, 3, 4, i_t::CycleMod::MOD1 },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE },
-        { "SBC", 0xFD, 3, 4, i_t::CycleMod::MOD1 },
-        { "INC", 0xFE, 3, 7, i_t::CycleMod::NONE },
-        { "INVAL", 0, 0, 1, i_t::CycleMod::NONE }
-    }
-};*/
-
 
 MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     this->IR = 0;
@@ -338,6 +46,16 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     };
     for (int i = 0; i < 4; i++) {
         this->lowNibbleEightHighEvenTwoCycleOps[i] = lowNibbleEightHighEvenTwoCycleOps[i];
+    }
+    
+    operation_t branchOps[8] = {
+        &MOS6502::BPL, &MOS6502::BMI,
+        &MOS6502::BVC, &MOS6502::BVS,
+        &MOS6502::BCC, &MOS6502::BCS,
+        &MOS6502::BNE, &MOS6502::BEQ
+    };
+    for (int i = 0; i < 8; i++) {
+        this->branchOps[i] = branchOps[i];
     }
 }
 
@@ -488,23 +206,29 @@ int MOS6502::cycle() {
         break;
     default:
         switch (this->IR & 0x1F) {
-        case 0x10000:
-            switch (this->IR >> 5) {
-            case 0b000:
+        case 0x10:  // Branches
+            switch (this->counter) {
+            case 1:
+                tmp[0] = this->addrSpace.r8(this->PC++);
                 break;
-            case 0b001:
+            case 2:
+                switch ((this->*(branchOps[this->IR >> 5]))(AddressMode::RELATIVE)) {
+                case -1:
+                    return -1;
+                case 0:
+                    this->IR = this->addrSpace.r8(this->PC++);
+                    this->counter = 0;
+                    break;
+                }
                 break;
-            case 0b010:
-                break;
-            case 0b011:
-                break;
-            case 0b100:
-                break;
-            case 0b101:
-                break;
-            case 0b110:
-                break;
-            case 0b111:
+            case 3:
+                if (((this->PC + (int8_t)tmp[0]) >> 8) != (this->PC >> 8)) {
+                    break;
+                }
+            case 4:
+                this->PC += (int8_t)tmp[0];
+                this->IR = this->addrSpace.r8(this->PC++);
+                this->counter = 0;
                 break;
             }
             break;
@@ -1632,7 +1356,19 @@ inline int MOS6502::INY(MOS6502::AddressMode addressMode, ...) {
 }
 inline int MOS6502::INX(MOS6502::AddressMode addressMode, ...) {
     printdf("INX\n");
-    return -1;
+    
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->X++;
+    this->setFlag(!this->X, Flags::ZERO);
+    this->setFlag(this->X & 0x80, Flags::NEGATIVE);
+    
+    return 1;
 }
 
 /* Flag instructions */
@@ -1779,33 +1515,81 @@ inline int MOS6502::NOP(MOS6502::AddressMode addressMode, ...) {
 /* Branch instructions */
 inline int MOS6502::BPL(MOS6502::AddressMode addressMode, ...) {
     printdf("BPL\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::RELATIVE:
+        break;
+    default:
+        return -1;
+    }
+    return !this->checkFlag(Flags::NEGATIVE);
 }
 inline int MOS6502::BMI(MOS6502::AddressMode addressMode, ...) {
     printdf("BMI\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::RELATIVE:
+        break;
+    default:
+        return -1;
+    }
+    return this->checkFlag(Flags::NEGATIVE);
 }
 inline int MOS6502::BVC(MOS6502::AddressMode addressMode, ...) {
     printdf("BVC\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::RELATIVE:
+        break;
+    default:
+        return -1;
+    }
+    return !this->checkFlag(Flags::OVERFLOW);
 }
 inline int MOS6502::BVS(MOS6502::AddressMode addressMode, ...) {
     printdf("BVS\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::RELATIVE:
+        break;
+    default:
+        return -1;
+    }
+    return this->checkFlag(Flags::OVERFLOW);
 }
 inline int MOS6502::BCC(MOS6502::AddressMode addressMode, ...) {
     printdf("BCC\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::RELATIVE:
+        break;
+    default:
+        return -1;
+    }
+    return !this->checkFlag(Flags::CARRY);
 }
 inline int MOS6502::BCS(MOS6502::AddressMode addressMode, ...) {
     printdf("BCS\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::RELATIVE:
+        break;
+    default:
+        return -1;
+    }
+    return this->checkFlag(Flags::CARRY);
 }
 inline int MOS6502::BNE(MOS6502::AddressMode addressMode, ...) {
     printdf("BNE\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::RELATIVE:
+        break;
+    default:
+        return -1;
+    }
+    return !this->checkFlag(Flags::ZERO);
 }
 inline int MOS6502::BEQ(MOS6502::AddressMode addressMode, ...) {
     printdf("BEQ\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::RELATIVE:
+        break;
+    default:
+        return -1;
+    }
+    return this->checkFlag(Flags::ZERO);
 }
