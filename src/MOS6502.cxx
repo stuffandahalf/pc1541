@@ -77,6 +77,10 @@ void MOS6502::step() {
     } while (this->counter);
 }
 
+int MOS6502::interrupt(uint8_t level) {
+    return 1;
+}
+
 inline bool MOS6502::checkFlag(Flags f) const {
     return this->P & (uint8_t)f;
 }
@@ -285,8 +289,51 @@ int MOS6502::cycle() {
                     }
                     break;
                 case 0b101: // zero page, x
+                    switch (this->counter) {
+                    case 1:
+                        tmp[0] = this->addrSpace.r8(this->PC++);
+                        break;
+                    case 2:
+                        tmp[0] += this->X;
+                        break;
+                    case 3:
+                        if ((this->*(operations[instructionGroup][instruction]))(AddressMode::ZERO_PAGE_X, tmp[0]) < 0) {
+                            return -1;
+                        }
+                        break;
+                    case 4:
+                        this->IR = this->addrSpace.r8(this->PC++);
+                        this->counter = 0;
+                        break;
+                    }
                     break;
                 case 0b111: // absolute, x
+                    switch (this->counter) {
+                    case 1:
+                        tmp[0] = this->addrSpace.r8(this->PC++);    // low address byte
+                        break;
+                    case 2:
+                        tmp[1] = this->addrSpace.r8(this->PC++);    // high address byte
+                        break;
+                    case 3:
+                        if (tmp[1] != ((((uint16_t)tmp[1] << 8) + tmp[0] + this->X) >> 8)) {
+                            tmp[2] = 0;
+                            break;
+                        }
+                        tmp[2] = 1;
+                    case 4:
+                        if ((this->*(operations[instructionGroup][instruction]))(AddressMode::ABSOLUTE_X, (((uint16_t)tmp[1] << 8) + tmp[0] + this->X)) < 0) {
+                            return -1;
+                        }
+                        if (tmp[2]) {
+                            this->counter++;
+                        }
+                        break;
+                    case 5:
+                        this->IR = this->addrSpace.r8(this->PC++);
+                        this->counter = 0;
+                        break;
+                    }
                     break;
                 }
                 break;
@@ -1344,15 +1391,51 @@ inline int MOS6502::PLA(MOS6502::AddressMode addressMode, ...) {
 }
 inline int MOS6502::DEY(MOS6502::AddressMode addressMode, ...) {
     printdf("DEY\n");
-    return -1;
+    
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->Y--;
+    this->setFlag(!this->Y, Flags::ZERO);
+    this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
+    
+    return 1;
 }
 inline int MOS6502::TAY(MOS6502::AddressMode addressMode, ...) {
     printdf("TAY\n");
-    return -1;
+    
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->Y = this->A;
+    this->setFlag(!this->Y, Flags::ZERO);
+    this->setFlag(this->Y & 0x80, Flags::NEGATIVE);
+    
+    return 1;
 }
 inline int MOS6502::INY(MOS6502::AddressMode addressMode, ...) {
     printdf("INY\n");
-    return -1;
+    
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->Y++;
+    this->setFlag(!this->Y, Flags::ZERO);
+    this->setFlag(this->X & 0x80, Flags::NEGATIVE);
+    
+    return 1;
 }
 inline int MOS6502::INX(MOS6502::AddressMode addressMode, ...) {
     printdf("INX\n");
@@ -1374,7 +1457,17 @@ inline int MOS6502::INX(MOS6502::AddressMode addressMode, ...) {
 /* Flag instructions */
 inline int MOS6502::CLC(MOS6502::AddressMode addressMode, ...) {
     printdf("CLC\n");
-    return -1;
+    
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->setFlag(false, Flags::CARRY);
+    
+    return 1;
 }
 inline int MOS6502::SEC(MOS6502::AddressMode addressMode, ...) {
     printdf("SEC\n");
@@ -1404,7 +1497,19 @@ inline int MOS6502::CLI(MOS6502::AddressMode addressMode, ...) {
 }
 inline int MOS6502::TYA(MOS6502::AddressMode addressMode, ...) {
     printdf("TYA\n");
-    return -1;
+    
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->A = this->Y;
+    this->setFlag(!this->A, Flags::ZERO);
+    this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+    
+    return 1;
 }
 inline int MOS6502::CLV(MOS6502::AddressMode addressMode, ...) {
     printdf("CLV\n");

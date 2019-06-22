@@ -7,10 +7,11 @@
 #include "CBMDriveEmu.h"
 #include "Memory.h"
 #include "IClockable.h"
+#include "IInterruptable.h"
 
 #define addrout(addr) std::cout << std::hex << (addr) << std::dec << std::endl
 
-class MOS6502 : IClockable {
+class MOS6502 : public IClockable, public IInterruptible {
 private:
     uint8_t IR;     // Instruction register (current opcode)
     uint8_t A;      // Accumulator
@@ -65,6 +66,7 @@ public:
     void reset();
     void step();
     virtual int cycle() override;
+    virtual int interrupt(uint8_t level) override;
     bool checkFlag(Flags f) const;
     bool setFlag(bool condition, Flags f);
     inline uint8_t getCounter() { return this->counter; }

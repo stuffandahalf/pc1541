@@ -41,37 +41,29 @@ int CBM1541::initialize() {
 
 void CBM1541::execute() {
     using namespace std;
-    //char in = 's';
-    //static IClockable clockedDevs[] = { this->cpu, this->motorHeadVia, this->serialVia/*, this->interface*/ };
 
-    std::cout << *this->cpu << std::endl;
     for (;;) {
         // load data from arduino into serial via port
         
-        //this->cpu->step();
-        //cout << *this->cpu << endl;
-        
         if (!this->cpu->getCounter()) {
             cout << *this->cpu << endl;
+            printdf("Serial VIA direction B = %X\n", this->serialVia->getRegisters()[MOS6522::RegIndex::DDRB].read());
+            printdf("Serial VIA port B = %X\n", this->serialVia->getRegisters()[MOS6522::RegIndex::PORTB].read());
         }
         if (this->cpu->cycle() < 0) {
-            break;
-        }
-        
-        //std::cout << *this->cpu << std::endl;
-        //std::cin >> in;
-
-        /*if (this->cpu->cycle() < 0) {
             cerr << "CPU encountered an invalid instruction." << endl;
             break;
         }
-#ifndef NDEBUG
-        if (this->cpu->getCounter() == 1) {
-            cout << *this->cpu << endl;
+        
+        if (this->serialVia->cycle() < 0) {
+            cerr << "Serial controller encountered an error." << endl;
+            break;
         }
-#endif*/
-        //if (this->)
+        if (this->motorHeadVia->cycle() < 0) {
+            cerr << "Disk head and motor controller encountered an error." << endl;
+            break;
+        }
 
     }
-    //this->cpu->step();
+    std::cout << *this->cpu << std::endl;
 }
