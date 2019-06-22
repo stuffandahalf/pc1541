@@ -47,8 +47,17 @@ void CBM1541::execute() {
     std::cout << *this->cpu << std::endl;
     for (;;) {
         // load data from arduino into serial via port
-        this->cpu->step();
-        cout << *this->cpu << endl;
+        
+        //this->cpu->step();
+        //cout << *this->cpu << endl;
+        
+        if (!this->cpu->getCounter()) {
+            cout << *this->cpu << endl;
+        }
+        if (this->cpu->cycle() < 0) {
+            break;
+        }
+        
         //std::cout << *this->cpu << std::endl;
         //std::cin >> in;
 

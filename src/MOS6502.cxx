@@ -313,19 +313,31 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
         { &MOS6502::ORA, &MOS6502::AND, &MOS6502::EOR, &MOS6502::ADC, &MOS6502::STA, &MOS6502::LDA, &MOS6502::CMP, &MOS6502::SBC },
         { &MOS6502::ASL, &MOS6502::ROL, &MOS6502::LSR, &MOS6502::ROR, &MOS6502::STX, &MOS6502::LDX, &MOS6502::DEC, &MOS6502::INC }
     };
-
-    operation_t flagOps[8] = {
-        &MOS6502::CLC, &MOS6502::SEC, &MOS6502::CLI, &MOS6502::SEI, &MOS6502::TYA, &MOS6502::CLV, &MOS6502::CLD, &MOS6502::SED
-    };
-
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 8; j++) {
             this->operations[i][j] = ops[i][j];
         }
     }
 
+    operation_t flagOps[8] = {
+        &MOS6502::CLC, &MOS6502::SEC, &MOS6502::CLI, &MOS6502::SEI, &MOS6502::TYA, &MOS6502::CLV, &MOS6502::CLD, &MOS6502::SED
+    };
     for (int i = 0; i < 8; i++) {
         this->flagOps[i] = flagOps[i];
+    }
+    
+    operation_t lowNibbleAOps[6] = {
+        &MOS6502::TXA, &MOS6502::TXS, &MOS6502::TAX, &MOS6502::TSX, &MOS6502::DEX, &MOS6502::NOP
+    };
+    for (int i = 0; i < 6; i++) {
+        this->lowNibbleAOps[i] = lowNibbleAOps[i];
+    }
+    
+    operation_t lowNibbleEightHighEvenTwoCycleOps[4] = {
+        &MOS6502::DEY, &MOS6502::TAY, &MOS6502::INY, &MOS6502::INX
+    };
+    for (int i = 0; i < 4; i++) {
+        this->lowNibbleEightHighEvenTwoCycleOps[i] = lowNibbleEightHighEvenTwoCycleOps[i];
     }
 }
 
@@ -419,15 +431,14 @@ int MOS6502::cycle() {
     case 0x68:  // PLA
         break;
     case 0x88:  // DEY
-        break;
     case 0xA8:  // TAY
-        break;
     case 0xC8:  // INY
-        break;
     case 0xE8:  // INX
         switch (this->counter) {
         case 1:
-            this->INX(AddressMode::IMPLIED);
+            if ((this->*(lowNibbleEightHighEvenTwoCycleOps[(this->IR >> 4) / 2 - 4]))(AddressMode::IMPLIED) < 0) {
+                return -1;
+            }
             break;
         case 2:
             this->IR = this->addrSpace.r8(this->PC++);
@@ -458,17 +469,22 @@ int MOS6502::cycle() {
         break;
 
     case 0x8A:  // TXA
-        // THIS IS NEXT
-        break;
     case 0x9A:  // TXS
-        break;
     case 0xAA:  // TAX
-        break;
     case 0xBA:  // TSX
-        break;
     case 0xCA:  // DEX
-        break;
     case 0xEA:  // NOP
+        switch (this->counter) {
+        case 1:
+            if ((this->*(lowNibbleAOps[(this->IR >> 4) - 8]))(AddressMode::IMPLIED) < 0) {
+                return -1;
+            }
+            break;
+        case 2:
+            this->IR = this->addrSpace.r8(this->PC++);
+            this->counter = 0;
+            break;
+        }
         break;
     default:
         switch (this->IR & 0x1F) {
@@ -617,7 +633,7 @@ int MOS6502::cycle() {
                         tmp[1] = this->addrSpace.r8(this->PC++);  // address high
                         break;
                     case 3:
-                        if ((this->*(this->operations[instructionGroup][instruction]))(AddressMode::IMMEDIATE, (tmp[1] << 8) + tmp[0]) < 0) {
+                        if ((this->*(this->operations[instructionGroup][instruction]))(AddressMode::ABSOLUTE, (tmp[1] << 8) + tmp[0]) < 0) {
                             return -1;
                         }
                         break;
@@ -1677,27 +1693,87 @@ inline int MOS6502::SED(MOS6502::AddressMode addressMode, ...) {
 /* Transfer instructions */
 inline int MOS6502::TXA(MOS6502::AddressMode addressMode, ...) {
     printdf("TXA\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->A = this->X;
+    this->setFlag(!this->A, Flags::ZERO);
+    this->setFlag(this->A & 0x80, Flags::NEGATIVE);
+    
+    return 1;
 }
 inline int MOS6502::TXS(MOS6502::AddressMode addressMode, ...) {
     printdf("TXS\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->SP = this->X;
+    
+    return 1;
 }
 inline int MOS6502::TAX(MOS6502::AddressMode addressMode, ...) {
     printdf("TAX\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->X = this->A;
+    this->setFlag(!this->X, Flags::ZERO);
+    this->setFlag(this->X & 0x80, Flags::NEGATIVE);
+    
+    return 1;
 }
 inline int MOS6502::TSX(MOS6502::AddressMode addressMode, ...) {
     printdf("TSX\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->X = this->SP;
+    this->setFlag(!this->X, Flags::ZERO);
+    this->setFlag(this->X & 0x80, Flags::NEGATIVE);
+    
+    return 1;
 }
 inline int MOS6502::DEX(MOS6502::AddressMode addressMode, ...) {
     printdf("DEX\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    this->X--;
+    this->setFlag(!this->X, Flags::ZERO);
+    this->setFlag(this->X & 0x80, Flags::NEGATIVE);
+    
+    return 1;
 }
 inline int MOS6502::NOP(MOS6502::AddressMode addressMode, ...) {
     printdf("NOP\n");
-    return -1;
+    switch (addressMode) {
+    case AddressMode::IMPLIED:
+        break;
+    default:
+        return -1;
+    }
+    
+    return 1;
 }
 
 /* Branch instructions */
