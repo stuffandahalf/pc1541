@@ -27,8 +27,14 @@ int ArduinoInterface::open() {
     }
 
     this->fd = ::open(this->devPath.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+    fcntl(this->fd, F_SETFL, 0);
     if (this->fd < 0) {
         std::cerr << "Failed to open serial device." << std::endl;
+        return -1;
+    }
+    
+    if (!isatty(this->fd)) {
+        std::cerr << "Opened device is not a serial device." << std::endl;
         return -1;
     }
 
@@ -42,27 +48,64 @@ int ArduinoInterface::open() {
 
     serialOld = serial;
 
-    cfsetospeed(&serial, (speed_t)this->baud);
-    cfsetispeed(&serial, (speed_t)this->baud);
+    serial.c_ispeed = (speed_t)this->baud;
+    serial.c_ospeed = (speed_t)this->baud;
+    //serial.c_ispeed = B115200;
+    //serial.c_ospeed = B115200;
 
-    serial.c_cflag &= ~PARENB;
+    /*serial.c_cflag &= ~PARENB;
     serial.c_cflag &= ~CSTOPB;
     serial.c_cflag &= ~CSIZE;
     serial.c_cflag |= CS8;
 
     serial.c_cflag &= ~CRTSCTS;
-    serial.c_cc[CMIN] = 1;
-    serial.c_cc[VTIME] = 5;
+    //serial.c_cc[CMIN] = 1;
+    serial.c_cc[VMIN] = 1;
+    //serial.c_cc[VTIME] = 5;
+    serial.c_cc[VTIME] = 0;
     serial.c_cflag |= CREAD | CLOCAL;
 
     cfmakeraw(&serial);
 
-    tcflush(this->fd, TCIFLUSH);
+    tcflush(this->fd, TCIFLUSH);*/
+    
+    serial.c_iflag &= ~( IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | IXON );
+    serial.c_oflag = 0;
+    
+    serial.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
+    
+    serial.c_cflag &= ~(CSIZE | PARENB);
+    serial.c_cflag |= CS8;
+    
+    serial.c_cc[VMIN] = 1;
+    serial.c_cc[VTIME] = 0;
 
-    if (tcsetattr(this->fd, TCSANOW, &serial) < 0) {
+    //if (tcsetattr(this->fd, TCSANOW, &serial) < 0) {
+    if (tcsetattr(this->fd, TCSAFLUSH, &serial) < 0) {
         std::cerr << "Failed to set serial configuration." << std::endl;
         return -3;
     }
+    
+    printdf("Waiting 3 seconds for arduino to initialize.\n");
+    usleep(5000 * 1000);
+    
+    InterfaceProtocol com = InterfaceProtocol::Ready;
+    int count;
+    //::write(this->fd, &com, sizeof(InterfaceProtocol));
+    //while ((count = ::read(this->fd, &com, sizeof(InterfaceProtocol))) < 0);
+    count = ::read(this->fd, &com, sizeof(InterfaceProtocol));
+    printdf("count: %d\n", count);
+    printdf("incoming byte: %d\n", (uint8_t)com);
+    return -4;
+    /*if (com != InterfaceProtocol::Ready) {
+        printdf("%d\n", (uint8_t)com);
+        printdf("Fuck\n");
+        return -4;
+    }
+    else {
+        printdf("Arduino initialized successfully.\n");
+    }*/
+    
 
     return 1;
 }
@@ -104,7 +147,13 @@ void ArduinoInterface::setPort(uint8_t port) {
 }
 
 uint8_t ArduinoInterface::getPort() {
-    return 0;
+    InterfaceProtocol com = InterfaceProtocol::GetPort;
+    ::write(this->fd, &com, sizeof(InterfaceProtocol));
+    do {
+        ::read(this->fd, &com, sizeof(InterfaceProtocol));
+    } while (com == InterfaceProtocol::Invalid);
+    
+    return (uint8_t)com;
 }
 
 void ArduinoInterface::close() {
