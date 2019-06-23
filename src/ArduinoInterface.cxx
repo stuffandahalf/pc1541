@@ -95,6 +95,18 @@ int ArduinoInterface::cycle() {
     return 1;
 }
 
+void ArduinoInterface::setDirection(uint8_t ddr) {
+    
+}
+
+void ArduinoInterface::setPort(uint8_t port) {
+    
+}
+
+uint8_t ArduinoInterface::getPort() {
+    return 0;
+}
+
 void ArduinoInterface::close() {
     ::close(this->fd);
     this->fd = -1;

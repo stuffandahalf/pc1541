@@ -1,9 +1,12 @@
 #ifndef MOS6522_H
 #define MOS6522_H
 
+#include <iostream>
 #include "Memory.h"
 #include "Registers.h"
 #include "IClockable.h"
+#include "IInterruptible.h"
+#include "ISynchronizable.h"
 
 class MOS6522;
 
@@ -31,13 +34,29 @@ public:
 
 private:
     Registers *regs;
+    IInterruptible *interruptible;
 
 public:
     MOS6522();
     ~MOS6522();
 
-    Registers& getRegisters();
+    void assignInterruptible(IInterruptible *interruptible);
+    void removeInterruptible();
+    int synchronizePortA(ISynchronizable<uint8_t> *syncDev);
+    int synchronizePortB(ISynchronizable<uint8_t> *syncDev);
+    
     virtual int cycle() override;
+    
+    inline Registers& getRegisters() { return *this->regs; }
+    
+    friend std::ostream& operator <<(std::ostream& os, const MOS6522& via);
+    
+private:
+    enum class Port : uint8_t {
+        A,
+        B
+    };
+    int synchronizePort(Port port, ISynchronizable<uint8_t> *syncDev);
 };
 
 #endif

@@ -7,7 +7,7 @@
 #include "CBMDriveEmu.h"
 #include "Memory.h"
 #include "IClockable.h"
-#include "IInterruptable.h"
+#include "IInterruptible.h"
 
 #define addrout(addr) std::cout << std::hex << (addr) << std::dec << std::endl
 

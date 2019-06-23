@@ -7,8 +7,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "IClockable.h"
+#include "ISynchronizable.h"
 
-class ArduinoInterface : public IClockable {
+class ArduinoInterface : public IClockable, public ISynchronizable<uint8_t> {
 private:
     int fd;
     std::string devPath;
@@ -25,7 +26,12 @@ public:
     bool isOpen();
     int open();
     void close();
+    
     virtual int cycle() override;
+    
+    virtual void setDirection(uint8_t ddr) override;
+    virtual void setPort(uint8_t port) override;
+    virtual uint8_t getPort() override;
 };
 
 #endif

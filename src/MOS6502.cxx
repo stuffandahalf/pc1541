@@ -96,13 +96,17 @@ inline bool MOS6502::setFlag(bool condition, Flags f) {
 }
 
 std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
-    os << "A:\t" << std::hex << (int)cpu.A << std::endl
-       << "X:\t" << std::hex << (int)cpu.X << std::endl
-       << "Y:\t" << std::hex << (int)cpu.Y << std::endl
-       << "SP:\t" << std::hex << (int)cpu.SP << std::endl
-       << "PC:\t" << std::hex << (int)cpu.PC << std::endl
-       << "IR:\t" << std::hex << (int)cpu.IR << std::endl
-       << "Flags" << std::endl
+    using std::hex;
+    using std::dec;
+    using std::endl;
+    
+    os << "A:\t" << hex << (int)cpu.A << endl
+       << "X:\t" << hex << (int)cpu.X << endl
+       << "Y:\t" << hex << (int)cpu.Y << endl
+       << "SP:\t" << hex << (int)cpu.SP << endl
+       << "PC:\t" << hex << (int)cpu.PC << endl
+       << "IR:\t" << hex << (int)cpu.IR << endl
+       << "Flags" << endl
        /*<< "N: " << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << " "
        << "V: " << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "
        << "B: " << cpu.checkFlag(MOS6502::Flags::BREAK) << " "
@@ -114,8 +118,8 @@ std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
        << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "
        << cpu.checkFlag(MOS6502::Flags::BREAK) << cpu.checkFlag(MOS6502::Flags::DECIMAL) << cpu.checkFlag(MOS6502::Flags::IRQ)
        << cpu.checkFlag(MOS6502::Flags::ZERO) << cpu.checkFlag(MOS6502::Flags::CARRY)
-       << std::endl
-       << "Cycles:\t" << std::dec << cpu.cycles << std::endl;
+       << endl
+       << "Cycles:\t" << dec << cpu.cycles << endl;
 
     return os;
 }

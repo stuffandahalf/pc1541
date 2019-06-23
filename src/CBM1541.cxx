@@ -40,15 +40,18 @@ int CBM1541::initialize() {
 }
 
 void CBM1541::execute() {
-    using namespace std;
+    using std::cout;
+    using std::cerr;
+    using std::endl;
 
     for (;;) {
         // load data from arduino into serial via port
         
         if (!this->cpu->getCounter()) {
             cout << *this->cpu << endl;
-            printdf("Serial VIA direction B = %X\n", this->serialVia->getRegisters()[MOS6522::RegIndex::DDRB].read());
-            printdf("Serial VIA port B = %X\n", this->serialVia->getRegisters()[MOS6522::RegIndex::PORTB].read());
+            cout << *this->serialVia << endl;
+            //printdf("Serial VIA direction B = %X\n", this->serialVia->getRegisters()[MOS6522::RegIndex::DDRB].read());
+            //printdf("Serial VIA port B = %X\n", this->serialVia->getRegisters()[MOS6522::RegIndex::PORTB].read());
         }
         if (this->cpu->cycle() < 0) {
             cerr << "CPU encountered an invalid instruction." << endl;
@@ -59,11 +62,12 @@ void CBM1541::execute() {
             cerr << "Serial controller encountered an error." << endl;
             break;
         }
-        if (this->motorHeadVia->cycle() < 0) {
+        //cout << *this->serialVia << endl;
+        //break;
+        /*if (this->motorHeadVia->cycle() < 0) {
             cerr << "Disk head and motor controller encountered an error." << endl;
             break;
-        }
-
+        }*/
     }
-    std::cout << *this->cpu << std::endl;
+    cout << *this->cpu << endl;
 }
