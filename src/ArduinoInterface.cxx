@@ -30,11 +30,11 @@ int ArduinoInterface::open() {
     }
 
     this->fd = ::open(this->devPath.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
-    fcntl(this->fd, F_SETFL, 0);
     if (this->fd < 0) {
         cerr << "Failed to open serial device." << endl;
         return -1;
     }
+    fcntl(this->fd, F_SETFL, 0);
     
     if (!isatty(this->fd)) {
         ::close(this->fd);
@@ -92,7 +92,12 @@ int ArduinoInterface::open() {
     serial.c_cc[VTIME] = 0;
 
     int ioctlFlags = TIOCM_RTS | TIOCM_DTR;
-    ioctl(this->fd, TIOCMBIS, &ioctlFlags);
+    if (ioctl(this->fd, TIOCMBIS, &ioctlFlags) < 0) {
+        ::close(this->fd);
+        this->fd = -1;
+        cerr << "Failed to enable RTS and DTR." << endl;
+        return -3;
+    }
     if (tcsetattr(this->fd, TCSAFLUSH, &serial) < 0) {
         ::close(this->fd);
         this->fd = -1;
