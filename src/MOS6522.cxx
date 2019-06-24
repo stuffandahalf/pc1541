@@ -61,23 +61,23 @@ int MOS6522::synchronizePortB(ISynchronizable<uint8_t> *syncDev) {
 std::ostream& operator <<(std::ostream& os, const MOS6522& via) {
     using std::endl;
     os
-        << "PORTB: " << (int)(*via.regs)[MOS6522::RegIndex::PORTB].read() << endl
-        << "PORTA: " << (int)(*via.regs)[MOS6522::RegIndex::PORTA].read() << endl
-        << "DDRB: " << (int)(*via.regs)[MOS6522::RegIndex::DDRB].read() << endl
-        << "DDRA: " << (int)(*via.regs)[MOS6522::RegIndex::DDRA].read() << endl
-        << "T1CL: " << (int)(*via.regs)[MOS6522::RegIndex::T1CL].read() << endl
-        << "T1CH: " << (int)(*via.regs)[MOS6522::RegIndex::T1CH].read() << endl
-        << "T1LL: " << (int)(*via.regs)[MOS6522::RegIndex::T1LL].read() << endl
-        << "T1LH: " << (int)(*via.regs)[MOS6522::RegIndex::T1LH].read() << endl
-        << "T2LL: " << (int)(*via.regs)[MOS6522::RegIndex::T2LL].read() << endl
-        << "T2CL: " << (int)(*via.regs)[MOS6522::RegIndex::T2CL].read() << endl
-        << "T2CH: " << (int)(*via.regs)[MOS6522::RegIndex::T2CH].read() << endl
-        << "SR: " << (int)(*via.regs)[MOS6522::RegIndex::SR].read() << endl
-        << "ACR: " << (int)(*via.regs)[MOS6522::RegIndex::ACR].read() << endl
-        << "PCR: " << (int)(*via.regs)[MOS6522::RegIndex::PCR].read() << endl
-        << "IFR: " << (int)(*via.regs)[MOS6522::RegIndex::IFR].read() << endl
-        << "IER: " << (int)(*via.regs)[MOS6522::RegIndex::IER].read() << endl
-        << "ORAX: " << (int)(*via.regs)[MOS6522::RegIndex::ORAX].read() << endl;
+        << "PORTB: " << (int)via.getRegisters()[MOS6522::RegIndex::PORTB].read() << endl
+        << "PORTA: " << (int)via.getRegisters()[MOS6522::RegIndex::PORTA].read() << endl
+        << "DDRB: " << (int)via.getRegisters()[MOS6522::RegIndex::DDRB].read() << endl
+        << "DDRA: " << (int)via.getRegisters()[MOS6522::RegIndex::DDRA].read() << endl
+        << "T1CL: " << (int)via.getRegisters()[MOS6522::RegIndex::T1CL].read() << endl
+        << "T1CH: " << (int)via.getRegisters()[MOS6522::RegIndex::T1CH].read() << endl
+        << "T1LL: " << (int)via.getRegisters()[MOS6522::RegIndex::T1LL].read() << endl
+        << "T1LH: " << (int)via.getRegisters()[MOS6522::RegIndex::T1LH].read() << endl
+        << "T2LL: " << (int)via.getRegisters()[MOS6522::RegIndex::T2LL].read() << endl
+        << "T2CL: " << (int)via.getRegisters()[MOS6522::RegIndex::T2CL].read() << endl
+        << "T2CH: " << (int)via.getRegisters()[MOS6522::RegIndex::T2CH].read() << endl
+        << "SR: " << (int)via.getRegisters()[MOS6522::RegIndex::SR].read() << endl
+        << "ACR: " << (int)via.getRegisters()[MOS6522::RegIndex::ACR].read() << endl
+        << "PCR: " << (int)via.getRegisters()[MOS6522::RegIndex::PCR].read() << endl
+        << "IFR: " << (int)via.getRegisters()[MOS6522::RegIndex::IFR].read() << endl
+        << "IER: " << (int)via.getRegisters()[MOS6522::RegIndex::IER].read() << endl
+        << "ORAX: " << (int)via.getRegisters()[MOS6522::RegIndex::ORAX].read() << endl;
     
     return os;
 }
