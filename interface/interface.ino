@@ -20,6 +20,7 @@ enum class InterfaceProtocol : uint8_t {
 
 void setup() {
     Serial.begin(115200);
+    while (!Serial) { }
     pinMode(LED, OUTPUT);
     digitalWrite(LED, LOW);
     
