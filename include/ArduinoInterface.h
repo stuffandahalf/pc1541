@@ -6,6 +6,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include "CBMDriveEmu.h"
 #include "IClockable.h"
 #include "ISynchronizable.h"

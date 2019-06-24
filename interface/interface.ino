@@ -23,33 +23,21 @@ void setup() {
     pinMode(LED, OUTPUT);
     digitalWrite(LED, LOW);
     
-    /*InterfaceProtocol com = InterfaceProtocol::Invalid;
-    do {
+    Serial.print((char)InterfaceProtocol::Ready);
+    InterfaceProtocol response = InterfaceProtocol::Invalid;
+    while (response != InterfaceProtocol::Ready) {
         if (Serial.available()) {
-            com = (InterfaceProtocol)Serial.read();
+            response = (InterfaceProtocol)Serial.read();
         }
-        else {
-            digitalWrite(LED, HIGH);
-            delay(50);
-            digitalWrite(LED, LOW);
-            delay(50);
-            digitalWrite(LED, HIGH);
-            delay(50);
-            digitalWrite(LED, LOW);
-            delay(250);
-        }
-    } while (com != InterfaceProtocol::Ready);
-    digitalWrite(LED, HIGH);
-    delay(2000);
-    digitalWrite(LED, LOW);
-    Serial.print((char)InterfaceProtocol::Ready);*/
-    
-    Serial.print((char)0);
-    while (true);
-    
-    /*while (Serial.available()) {
-        Serial.read();
-    }*/
+        digitalWrite(LED, HIGH);
+        delay(50);
+        digitalWrite(LED, LOW);
+        delay(50);
+        digitalWrite(LED, HIGH);
+        delay(50);
+        digitalWrite(LED, LOW);
+        delay(250);
+    }
     
     /*Serial.println(DDRB, HEX);
     Serial.println(PORTB, HEX);

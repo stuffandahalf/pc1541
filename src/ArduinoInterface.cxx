@@ -22,6 +22,9 @@ bool ArduinoInterface::isOpen() {
 
 // Logic from https://stackoverflow.com/questions/31663776/ubuntu-c-termios-h-example-program
 int ArduinoInterface::open() {
+    using std::cerr;
+    using std::endl;
+    
     if (this->isOpen()) {
         return 0;
     }
@@ -29,12 +32,14 @@ int ArduinoInterface::open() {
     this->fd = ::open(this->devPath.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
     fcntl(this->fd, F_SETFL, 0);
     if (this->fd < 0) {
-        std::cerr << "Failed to open serial device." << std::endl;
+        cerr << "Failed to open serial device." << endl;
         return -1;
     }
     
     if (!isatty(this->fd)) {
-        std::cerr << "Opened device is not a serial device." << std::endl;
+        ::close(this->fd);
+        this->fd = -1;
+        cerr << "Opened device is not a serial device." << endl;
         return -1;
     }
 
@@ -42,7 +47,9 @@ int ArduinoInterface::open() {
     struct termios serialOld;
 
     if (tcgetattr(this->fd, &serial) < 0) {
-        std::cerr << "Failed to acquire serial port configuration." << std::endl;
+        ::close(this->fd);
+        this->fd = -1;
+        cerr << "Failed to acquire serial port configuration." << endl;
         return -2;
     }
 
@@ -50,8 +57,8 @@ int ArduinoInterface::open() {
 
     serial.c_ispeed = (speed_t)this->baud;
     serial.c_ospeed = (speed_t)this->baud;
-    //serial.c_ispeed = B115200;
-    //serial.c_ospeed = B115200;
+    //cfsetispeed(&serial, B115200);
+    //cfsetospeed(&serial, B115200);
 
     /*serial.c_cflag &= ~PARENB;
     serial.c_cflag &= ~CSTOPB;
@@ -70,41 +77,46 @@ int ArduinoInterface::open() {
     tcflush(this->fd, TCIFLUSH);*/
     
     serial.c_iflag &= ~( IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | IXON );
+    //serial.c_iflag |= IXON;
+    //serial.c_iflag |= IXOFF;
+    //serial.c_iflag = 0;
     serial.c_oflag = 0;
     
     serial.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
     
     serial.c_cflag &= ~(CSIZE | PARENB);
-    serial.c_cflag |= CS8;
+    //serial.c_cflag |= CS8;
+    serial.c_cflag = CS8 | CREAD | CLOCAL;
     
     serial.c_cc[VMIN] = 1;
     serial.c_cc[VTIME] = 0;
 
-    //if (tcsetattr(this->fd, TCSANOW, &serial) < 0) {
+    int ioctlFlags = TIOCM_RTS | TIOCM_DTR;
+    ioctl(this->fd, TIOCMBIS, &ioctlFlags);
     if (tcsetattr(this->fd, TCSAFLUSH, &serial) < 0) {
-        std::cerr << "Failed to set serial configuration." << std::endl;
+        ::close(this->fd);
+        this->fd = -1;
+        cerr << "Failed to set serial configuration." << endl;
         return -3;
     }
     
-    printdf("Waiting 3 seconds for arduino to initialize.\n");
-    usleep(5000 * 1000);
-    
-    InterfaceProtocol com = InterfaceProtocol::Ready;
+    InterfaceProtocol com = InterfaceProtocol::Invalid;
     int count;
-    //::write(this->fd, &com, sizeof(InterfaceProtocol));
     //while ((count = ::read(this->fd, &com, sizeof(InterfaceProtocol))) < 0);
-    count = ::read(this->fd, &com, sizeof(InterfaceProtocol));
-    printdf("count: %d\n", count);
-    printdf("incoming byte: %d\n", (uint8_t)com);
-    return -4;
-    /*if (com != InterfaceProtocol::Ready) {
-        printdf("%d\n", (uint8_t)com);
-        printdf("Fuck\n");
+    do {
+        count = ::read(this->fd, &com, sizeof(InterfaceProtocol));
+        printdf("count: %d\n", count);
+        printdf("incoming byte: %d\n", (uint8_t)com);
+    } while (count < 0);
+    if (com != InterfaceProtocol::Ready) {
+        cerr << "Failed to initialize arduino interface." << endl;
+        this->fd = -1;
         return -4;
     }
     else {
+        ::write(this->fd, &com, sizeof(InterfaceProtocol));
         printdf("Arduino initialized successfully.\n");
-    }*/
+    }
     
 
     return 1;

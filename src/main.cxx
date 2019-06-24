@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
         deleteConfig(&cfg);
         return 1;
     }
-    drive->execute();
+    //drive->execute();
     delete drive;
     
     deleteConfig(&cfg);
