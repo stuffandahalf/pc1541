@@ -3,8 +3,16 @@
 #include "CBMDriveEmu.h"
 #include "CBM1541.h"
 
-#ifdef _GNU_SOURCE
+#if defined(_GNU_SOURCE)
 #include <getopt.h>
+#elif defined(_WIN32)
+struct opt {
+	const char *larg;	// long argument
+	const char sarg;	// short argument
+	bool hasArg;		// requires argument
+};
+
+int getopt(int argc, const char **argv, const struct opt[] opts);
 #else
 #include <unistd.h>
 #endif
@@ -16,14 +24,20 @@ void printHelp();
 void deleteConfig(struct config *cfg);
 
 int main(int argc, char **argv) {
-    struct config cfg {
+	struct config cfg;
+	cfg.firmware.size = 0;
+	cfg.firmware.data = nullptr;
+	cfg.devPath = nullptr;
+	cfg.baud = 115200;
+
+	/*struct config cfg {
         .firmware = {
             .size = 0,
             .data = nullptr
         },
         .devPath = nullptr,
         .baud = 115200
-    };
+    };*/
     int configureState = configure(argc, argv, &cfg);
     if (configureState <= 0) {
         deleteConfig(&cfg);
@@ -59,7 +73,7 @@ int configure(int argc, char **argv, struct config *cfg) {
     char *endPtr = nullptr;
     ifstream *firmwareStream = nullptr;
     
-#ifdef _GNU_SOURCE
+#if defined(_GNU_SOURCE)
     struct option long_opts[] = {
         { "device", required_argument, 0, 'd' },
         { "baud", required_argument, 0, 'b' },
@@ -69,6 +83,16 @@ int configure(int argc, char **argv, struct config *cfg) {
     };
 
     while ((opt = getopt_long(argc, argv, "d:b:f:h", long_opts, 0)) != -1) {
+#elif defined(_WIN32)
+	struct opt long_opts[] = {
+		{ "device", 'd', true },
+		{ "baud", 'b', true },
+		{ "firmware", 'f', true },
+		{ "help", 'h', false },
+		{ 0, 0, 0 }
+	};
+
+	while ((opt = getopt(argc, argv, long_opts)) != -1) {
 #else
     while ((opt = getopt(argc, argv, "d:b:f:h")) != -1) {
 #endif
@@ -177,3 +201,9 @@ void deleteConfig(struct config *cfg) {
         delete[] cfg->firmware.data;
     }
 }
+
+#if defined(_WIN32)
+int getopt(int argc, const char **argv, const char *args) {
+	return -1;
+}
+#endif

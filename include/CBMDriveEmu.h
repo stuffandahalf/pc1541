@@ -5,7 +5,8 @@
 #include <string>
 
 #ifndef NDEBUG
-extern int printf(const char *fmt, ...);
+//extern int printf(const char *fmt, ...);
+#include <cstdio>
 #define printdf(fmt, ...) printf("[%s.%d] >> " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 #else
 #define printdf(fmt, ...)

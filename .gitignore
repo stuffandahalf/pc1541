@@ -31,10 +31,6 @@
 *.out
 *.app
 
-pc1541
-.DS_Store
-xcode
-
 # CMake files
 CMakeLists.txt.user
 CMakeCache.txt
@@ -47,3 +43,8 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+
+pc1541
+.DS_Store
+xcode
+/.vs
