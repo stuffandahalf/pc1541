@@ -12,7 +12,8 @@ struct opt {
 	bool hasArg;		// requires argument
 };
 
-int getopt(int argc, const char **argv, const struct opt[] opts);
+char *optarg = nullptr;
+int getopt(int argc, const char **argv, const struct opt *opts);
 #else
 #include <unistd.h>
 #endif
@@ -203,7 +204,7 @@ void deleteConfig(struct config *cfg) {
 }
 
 #if defined(_WIN32)
-int getopt(int argc, const char **argv, const char *args) {
+int getopt(int argc, const char **argv, const opt *opts) {
 	return -1;
 }
 #endif

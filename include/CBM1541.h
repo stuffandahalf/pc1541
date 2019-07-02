@@ -16,7 +16,7 @@ private:
     MOS6522 *motorHeadVia;
     ROM *rom;
     RAM *ram;
-    ArduinoInterface *interface;
+    ArduinoInterface *iface;
     
 public:
     CBM1541(struct config& cfg);

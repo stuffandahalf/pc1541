@@ -7,7 +7,7 @@ CBM1541::CBM1541(struct config& cfg) {
     this->cpu = new MOS6502(this->addrSpace);
     this->serialVia = new MOS6522();
     this->motorHeadVia = new MOS6522();
-    this->interface = new ArduinoInterface(*cfg.devPath, cfg.baud);
+    this->iface = new ArduinoInterface(*cfg.devPath, cfg.baud);
 
     this->rom->load(cfg.firmware.size, cfg.firmware.data);
 
@@ -18,11 +18,11 @@ CBM1541::CBM1541(struct config& cfg) {
 }
 
 CBM1541::~CBM1541() {
-    if (this->interface->isOpen()) {
-        this->interface->close();
+    if (this->iface->isOpen()) {
+        this->iface->close();
     }
 
-    delete this->interface;
+    delete this->iface;
     delete this->motorHeadVia;
     delete this->serialVia;
     delete this->cpu;
@@ -32,7 +32,7 @@ CBM1541::~CBM1541() {
 }
 
 int CBM1541::initialize() {
-    if (this->interface->open() < 0) {
+    if (this->iface->open() < 0) {
         return -1;
     }
     this->cpu->reset();

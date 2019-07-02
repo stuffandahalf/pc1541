@@ -115,7 +115,7 @@ std::ostream& operator <<(std::ostream& os, const MOS6502& cpu) {
        << "Z: " << cpu.checkFlag(MOS6502::Flags::ZERO) << " "
        << "C: " << cpu.checkFlag(MOS6502::Flags::CARRY) << " "*/
        << "NV BDIZC" << std::endl
-       << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << cpu.checkFlag(MOS6502::Flags::OVERFLOW) << " "
+       << cpu.checkFlag(MOS6502::Flags::NEGATIVE) << cpu.checkFlag(MOS6502::Flags::OFLOW) << " "
        << cpu.checkFlag(MOS6502::Flags::BREAK) << cpu.checkFlag(MOS6502::Flags::DECIMAL) << cpu.checkFlag(MOS6502::Flags::IRQ)
        << cpu.checkFlag(MOS6502::Flags::ZERO) << cpu.checkFlag(MOS6502::Flags::CARRY)
        << endl
@@ -751,7 +751,7 @@ inline int MOS6502::BIT(MOS6502::AddressMode addressMode, ...) {
 
     this->setFlag(!result, Flags::ZERO);
     this->setFlag(val & 0x80, Flags::NEGATIVE);
-    this->setFlag(val & 0x40, Flags::OVERFLOW);
+    this->setFlag(val & 0x40, Flags::OFLOW);
 
     va_end(args);
     return 1;
@@ -1017,7 +1017,7 @@ inline int MOS6502::ADC(MOS6502::AddressMode addressMode, ...) {
     this->A = (uint8_t)result;
     this->setFlag(!this->A, Flags::ZERO);
     this->setFlag(this->A & 0x80, Flags::NEGATIVE);
-    this->setFlag(result & 0xFF00, Flags::OVERFLOW);
+    this->setFlag(result & 0xFF00, Flags::OFLOW);
     return 1;
 }
 inline int MOS6502::STA(MOS6502::AddressMode addressMode, ...) {
@@ -1137,7 +1137,7 @@ inline int MOS6502::SBC(MOS6502::AddressMode addressMode, ...) {
     int16_t correctResult = this->A - var - (1 - this->checkFlag(Flags::CARRY));
     this->A = correctResult & 0xFF;
     this->setFlag(this->A != correctResult, Flags::CARRY);
-    this->setFlag(this->A != correctResult, Flags::OVERFLOW);
+    this->setFlag(this->A != correctResult, Flags::OFLOW);
     this->setFlag(!this->A, Flags::ZERO);
     return 1;
 }
@@ -1192,7 +1192,7 @@ inline int MOS6502::ROL(MOS6502::AddressMode addressMode, ...) {
 
     uint8_t oldVal = *val;
     *val <<= 1;
-    *val |= this->checkFlag(Flags::CARRY);
+    *val |= (uint8_t)this->checkFlag(Flags::CARRY);
     printdf("Carry flag value 0x%X", this->checkFlag(Flags::CARRY));
 
     this->setFlag(oldVal & 0x80, Flags::CARRY);
@@ -1650,7 +1650,7 @@ inline int MOS6502::BVC(MOS6502::AddressMode addressMode, ...) {
     default:
         return -1;
     }
-    return !this->checkFlag(Flags::OVERFLOW);
+    return !this->checkFlag(Flags::OFLOW);
 }
 inline int MOS6502::BVS(MOS6502::AddressMode addressMode, ...) {
     printdf("BVS\n");
@@ -1660,7 +1660,7 @@ inline int MOS6502::BVS(MOS6502::AddressMode addressMode, ...) {
     default:
         return -1;
     }
-    return this->checkFlag(Flags::OVERFLOW);
+    return this->checkFlag(Flags::OFLOW);
 }
 inline int MOS6502::BCC(MOS6502::AddressMode addressMode, ...) {
     printdf("BCC\n");

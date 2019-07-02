@@ -78,4 +78,6 @@ std::ostream& operator <<(std::ostream& os, const MOS6522& via) {
         << "IFR: " << (int)(*via.regs)[MOS6522::RegIndex::IFR].read() << endl
         << "IER: " << (int)(*via.regs)[MOS6522::RegIndex::IER].read() << endl
         << "ORAX: " << (int)(*via.regs)[MOS6522::RegIndex::ORAX].read() << endl;
+
+	return os;
 }

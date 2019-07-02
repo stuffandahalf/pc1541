@@ -41,7 +41,7 @@ public:
         DECIMAL = 8,
         BREAK = 16,
         // 1
-        OVERFLOW = 64,
+        OFLOW = 64,
         NEGATIVE = 128
     };
 
