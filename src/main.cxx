@@ -13,7 +13,7 @@ struct opt {
 };
 
 int optind = 1;
-char *optarg = nullptr;
+const char *optarg = nullptr;
 int getopt(int argc, const char *const *argv, const struct opt *opts);
 #else
 #include <unistd.h>
@@ -44,7 +44,7 @@ int main(int argc, char *const *argv) {
     if (configureState <= 0) {
         deleteConfig(&cfg);
         if (configureState < 0) {
-            std::cerr << "Failed to configure pc1541" << std::endl;
+			std::cerr << "Failed to configure pc1541" << std::endl;
             return 1;
         }
         return 0;
@@ -67,6 +67,7 @@ int main(int argc, char *const *argv) {
     iface->write("Hello World", 11);
     iface->close();
     delete iface;*/
+
 	return 0;
 }
 
@@ -211,7 +212,7 @@ int getopt(int argc, const char *const *argv, const opt *opts) {
         return -1;
     }
     
-    char *optStr = argv[optind];
+    const char *optStr = argv[optind];
     bool shortOpt = true;
     if (*optStr == '-') {
         optStr++;
@@ -224,11 +225,25 @@ int getopt(int argc, const char *const *argv, const opt *opts) {
         return '?';
     }
     
-    for (struct opt *o = opts; o->larg == 0; o++) {
+    for (const struct opt *o = opts; o->larg != 0; o++) {
         if (shortOpt && *optStr == o->sarg) {
+			optind++;
+			if (o->hasArg) {
+				if (optind == argc) {
+					return '?';
+				}
+				optarg = argv[optind++];
+			}
             return o->sarg;
         }
         else if (!strcmp(optStr, o->larg)) {
+			optind++;
+			if (o->hasArg) {
+				if (optind == argc) {
+					return '?';
+				}
+				optarg = argv[optind++];
+			}
             return o->sarg;
         }
     }

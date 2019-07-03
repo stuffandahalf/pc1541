@@ -30,7 +30,9 @@ public:
     ArduinoInterface(const char *devName);
     ~ArduinoInterface();
 
+#ifndef _WIN32
     void write(const char *str, std::size_t count);
+#endif
     bool isOpen();
     int open();
     void close();

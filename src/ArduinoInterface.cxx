@@ -119,6 +119,7 @@ int ArduinoInterface::open() {
 }
 #endif
 
+#ifndef _WIN32
 void ArduinoInterface::write(const char *str, std::size_t count) {
     //fprintf(this->dev, "This is a test");
     int64_t received = 0;
@@ -141,9 +142,12 @@ void ArduinoInterface::write(const char *str, std::size_t count) {
 
     delete[] bufferBase;
 }
+#endif
 
 int ArduinoInterface::cycle() {
+#ifndef _WIN32
     this->write("Hello\n", 6);
+#endif
     return 1;
 }
 
