@@ -12,6 +12,7 @@ struct opt {
 	bool hasArg;		// requires argument
 };
 
+int optind = 1;
 char *optarg = nullptr;
 int getopt(int argc, const char **argv, const struct opt *opts);
 #else
@@ -205,6 +206,13 @@ void deleteConfig(struct config *cfg) {
 
 #if defined(_WIN32)
 int getopt(int argc, const char **argv, const opt *opts) {
-	return -1;
+    if (optind >= argc) {
+        return -1;
+    }
+    for (struct opt *o = opts; o->larg == 0; o++) {
+        
+    }
+    std::cerr << "Encountered invalid option " << argv[optind] << std::endl;
+	return '?';
 }
 #endif
