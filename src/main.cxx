@@ -14,18 +14,18 @@ struct opt {
 
 int optind = 1;
 char *optarg = nullptr;
-int getopt(int argc, const char **argv, const struct opt *opts);
+int getopt(int argc, const char *const *argv, const struct opt *opts);
 #else
 #include <unistd.h>
 #endif
 
 using namespace std;
 
-int configure(int argc, char **argv, struct config *cfg);
+int configure(int argc, char *const *argv, struct config *cfg);
 void printHelp();
 void deleteConfig(struct config *cfg);
 
-int main(int argc, char **argv) {
+int main(int argc, char *const *argv) {
 	struct config cfg;
 	cfg.firmware.size = 0;
 	cfg.firmware.data = nullptr;
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-int configure(int argc, char **argv, struct config *cfg) {
+int configure(int argc, char *const *argv, struct config *cfg) {
     int opt = 0;
     char *endPtr = nullptr;
     ifstream *firmwareStream = nullptr;
@@ -146,6 +146,7 @@ int configure(int argc, char **argv, struct config *cfg) {
             printHelp();
             return 0;
             break;
+        case '?':
         default:
             return -1;
         }
@@ -205,12 +206,31 @@ void deleteConfig(struct config *cfg) {
 }
 
 #if defined(_WIN32)
-int getopt(int argc, const char **argv, const opt *opts) {
+int getopt(int argc, const char *const *argv, const opt *opts) {
     if (optind >= argc) {
         return -1;
     }
+    
+    char *optStr = argv[optind];
+    bool shortOpt = true;
+    if (*optStr == '-') {
+        optStr++;
+        if (*optStr == '-') {
+            optStr++;
+            shortOpt = false;
+        }
+    }
+    else {
+        return '?';
+    }
+    
     for (struct opt *o = opts; o->larg == 0; o++) {
-        
+        if (shortOpt && *optStr == o->sarg) {
+            return o->sarg;
+        }
+        else if (!strcmp(optStr, o->larg)) {
+            return o->sarg;
+        }
     }
     std::cerr << "Encountered invalid option " << argv[optind] << std::endl;
 	return '?';
