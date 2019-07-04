@@ -6,7 +6,7 @@
 #include "Registers.h"
 #include "IClockable.h"
 #include "IInterruptible.h"
-#include "ISynchronizable.h"
+#include "IPeripheral.h"
 
 class MOS6522;
 
@@ -42,8 +42,8 @@ public:
 
     void assignInterruptible(IInterruptible *interruptible);
     void removeInterruptible();
-    int synchronizePortA(ISynchronizable<uint8_t> *syncDev);
-    int synchronizePortB(ISynchronizable<uint8_t> *syncDev);
+    int synchronizePortA(IPeripheral<uint8_t> *syncDev);
+    int synchronizePortB(IPeripheral<uint8_t> *syncDev);
     
     virtual int cycle() override;
     
@@ -56,7 +56,7 @@ private:
         A,
         B
     };
-    int synchronizePort(Port port, ISynchronizable<uint8_t> *syncDev);
+    int synchronizePort(Port port, IPeripheral<uint8_t> *syncDev);
 };
 
 #endif

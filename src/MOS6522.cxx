@@ -28,7 +28,7 @@ namespace {
     };
 }
 
-int MOS6522::synchronizePort(Port port, ISynchronizable<uint8_t> *syncDev) {
+int MOS6522::synchronizePort(Port port, IPeripheral<uint8_t> *syncDev) {
     RegIndex portIndex;
     RegIndex ddrIndex;
     
@@ -50,11 +50,11 @@ int MOS6522::synchronizePort(Port port, ISynchronizable<uint8_t> *syncDev) {
     return 1;
 }
 
-int MOS6522::synchronizePortA(ISynchronizable<uint8_t> *syncDev) {
+int MOS6522::synchronizePortA(IPeripheral<uint8_t> *syncDev) {
     return this->synchronizePort(Port::A, syncDev);
 }
 
-int MOS6522::synchronizePortB(ISynchronizable<uint8_t> *syncDev) {
+int MOS6522::synchronizePortB(IPeripheral<uint8_t> *syncDev) {
     return this->synchronizePort(Port::B, syncDev);
 }
 

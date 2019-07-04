@@ -7,9 +7,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "IClockable.h"
-#include "ISynchronizable.h"
+#include "IPeripheral.h"
 
-class ArduinoInterface : public IClockable, public ISynchronizable<uint8_t> {
+class ArduinoInterface : public IClockable, public IPeripheral<uint8_t> {
 private:
     int fd;
     std::string devPath;
