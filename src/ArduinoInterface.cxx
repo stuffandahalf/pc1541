@@ -86,7 +86,10 @@ int ArduinoInterface::open() {
     
     serial.c_cflag &= ~(CSIZE | PARENB);
     //serial.c_cflag |= CS8;
-    serial.c_cflag = CS8 | CREAD | CLOCAL;
+    //serial.c_cflag = CS8 | CREAD | CLOCAL;
+    serial.c_cflag |= CS8;
+    serial.c_cflag |= CREAD;
+    serial.c_cflag |= CLOCAL;
     
     serial.c_cc[VMIN] = 1;
     serial.c_cc[VTIME] = 0;
