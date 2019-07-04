@@ -32,14 +32,6 @@ int main(int argc, char *const *argv) {
 	cfg.devPath = nullptr;
 	cfg.baud = 115200;
 
-	/*struct config cfg {
-        .firmware = {
-            .size = 0,
-            .data = nullptr
-        },
-        .devPath = nullptr,
-        .baud = 115200
-    };*/
     int configureState = configure(argc, argv, &cfg);
     if (configureState <= 0) {
         deleteConfig(&cfg);

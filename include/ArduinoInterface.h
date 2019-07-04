@@ -8,8 +8,8 @@
 #else
 #include <termios.h>
 #include <unistd.h>
-#endif
 #include <fcntl.h>
+#endif
 #include "IClockable.h"
 #include "ISynchronizable.h"
 
