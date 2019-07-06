@@ -55,10 +55,10 @@ int ArduinoInterface::open() {
 
     serialOld = serial;
 
-    serial.c_ispeed = (speed_t)this->baud;
-    serial.c_ospeed = (speed_t)this->baud;
-    //cfsetispeed(&serial, B115200);
-    //cfsetospeed(&serial, B115200);
+    //serial.c_ispeed = (speed_t)this->baud;
+    //serial.c_ospeed = (speed_t)this->baud;
+    cfsetispeed(&serial, B115200);
+    cfsetospeed(&serial, B115200);
 
     /*serial.c_cflag &= ~PARENB;
     serial.c_cflag &= ~CSTOPB;
