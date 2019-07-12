@@ -56,7 +56,7 @@ void CBM1541::execute() {
             //printdf("Serial VIA port B = %X\n", this->serialVia->getRegisters()[MOS6522::RegIndex::PORTB].read());
         }*/
         
-        /*if (this->cpu->cycle() < 0) {
+        if (this->cpu->cycle() < 0) {
             cerr << "CPU encountered an invalid instruction." << endl;
             break;
         }
@@ -64,7 +64,7 @@ void CBM1541::execute() {
         if (this->serialVia->cycle() < 0) {
             cerr << "Serial controller encountered an error." << endl;
             break;
-        }*/
+        }
         //cout << *this->serialVia << endl;
         //break;
         /*if (this->motorHeadVia->cycle() < 0) {

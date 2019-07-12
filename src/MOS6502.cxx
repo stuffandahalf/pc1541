@@ -13,6 +13,9 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     this->PC = 0xFFFC;    // Reset vector
     this->P = 32;           // All flags 0 except for unused flag
 
+    this->nmi = new Interrupt();
+    this->irq = new Interrupt();
+
     this->counter = 0;
     this->cycles = 0;
 
@@ -59,6 +62,11 @@ MOS6502::MOS6502(AddressSpace *addrSpace) : addrSpace(*addrSpace) {
     }
 }
 
+MOS6502::~MOS6502() {
+    delete this->irq;
+    delete this->nmi;
+}
+
 void MOS6502::reset() {
     uint16_t start = 0;
     start |= this->addrSpace.r8(this->PC++);
@@ -75,10 +83,6 @@ void MOS6502::step() {
     do {
         this->cycle();
     } while (this->counter);
-}
-
-int MOS6502::interrupt(uint8_t level) {
-    return 1;
 }
 
 inline bool MOS6502::checkFlag(Flags f) const {

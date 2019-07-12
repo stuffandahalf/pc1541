@@ -5,7 +5,9 @@
 
 class IInterruptible {
 public:
-    virtual int interrupt(uint8_t level) = 0;
+    virtual void interrupt() = 0;
+    virtual bool pending() = 0;
+    virtual void dismiss() = 0;
     virtual ~IInterruptible() { }
 };
 
