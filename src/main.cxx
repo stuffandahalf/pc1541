@@ -35,22 +35,24 @@ int main(int argc, char **argv) {
     }
     
     
-    CBM1541 *drive = new CBM1541(cfg);
+    /*CBM1541 *drive = new CBM1541(cfg);
     if (drive->initialize() < 0) {
         delete drive;
         deleteConfig(&cfg);
         return 1;
     }
     //drive->execute();
-    delete drive;
+    delete drive;*/
+    
+    
+    ArduinoInterface *iface = new ArduinoInterface(*cfg.devPath);
+    iface->open();
+    //iface->write("Hello World", 11);
+    iface->setDirection(0x55);
+    iface->close();
+    delete iface;
     
     deleteConfig(&cfg);
-    
-    /*ArduinoInterface *iface = new ArduinoInterface(*cfg.devPath, cfg.baud);
-    iface->open();
-    iface->write("Hello World", 11);
-    iface->close();
-    delete iface;*/
 	return 0;
 }
 

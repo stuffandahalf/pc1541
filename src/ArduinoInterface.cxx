@@ -159,21 +159,30 @@ int ArduinoInterface::cycle() {
 }
 
 void ArduinoInterface::setDirection(uint8_t ddr) {
-    
+    InterfaceProtocol com = InterfaceProtocol::SetDirection;
+    ::write(this->fd, &com, sizeof(InterfaceProtocol));
+    ::write(this->fd, &ddr, sizeof(uint8_t));
+    do {
+        ::read(this->fd, &com, sizeof(InterfaceProtocol));
+    } while (com != InterfaceProtocol::Ready);
 }
 
 void ArduinoInterface::setPort(uint8_t port) {
-    
+    InterfaceProtocol com = InterfaceProtocol::SetPort;
+    ::write(this->fd, &com, sizeof(InterfaceProtocol));
+    ::write(this->fd, &port, sizeof(uint8_t));
+    do {
+        ::read(this->fd, &com, sizeof(InterfaceProtocol));
+    } while (com != InterfaceProtocol::Ready);
 }
 
 uint8_t ArduinoInterface::getPort() {
     InterfaceProtocol com = InterfaceProtocol::GetPort;
     ::write(this->fd, &com, sizeof(InterfaceProtocol));
-    do {
-        ::read(this->fd, &com, sizeof(InterfaceProtocol));
-    } while (com == InterfaceProtocol::Invalid);
+    uint8_t port;
+    ::read(this->fd, &port, sizeof(uint8_t));
     
-    return (uint8_t)com;
+    return port;
 }
 
 void ArduinoInterface::close() {

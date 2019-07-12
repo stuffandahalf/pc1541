@@ -44,11 +44,12 @@ void CBM1541::execute() {
     using std::cerr;
     using std::endl;
 
-    //this->serialVia->synchronizePortB(this->interface);
     for (;;) {
+        this->serialVia->synchronizePortB(this->interface);
         //printdf("interface port: %X\n", this->interface->getPort());
         // load data from arduino into serial via port
         
+        cout << *this->serialVia << endl;
         /*if (!this->cpu->getCounter()) {
             cout << *this->cpu << endl;
             cout << *this->serialVia << endl;
@@ -59,12 +60,12 @@ void CBM1541::execute() {
         /*if (this->cpu->cycle() < 0) {
             cerr << "CPU encountered an invalid instruction." << endl;
             break;
-        }
+        }*/
         
         if (this->serialVia->cycle() < 0) {
             cerr << "Serial controller encountered an error." << endl;
             break;
-        }*/
+        }
         //cout << *this->serialVia << endl;
         //break;
         /*if (this->motorHeadVia->cycle() < 0) {
