@@ -22,13 +22,24 @@ bool ArduinoInterface::isOpen() {
 
 // Logic from https://stackoverflow.com/questions/31663776/ubuntu-c-termios-h-example-program
 int ArduinoInterface::open() {
+    using std::cerr;
+    using std::endl;
+    
     if (this->isOpen()) {
         return 0;
     }
 
     this->fd = ::open(this->devPath.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
     if (this->fd < 0) {
-        std::cerr << "Failed to open serial device." << std::endl;
+        cerr << "Failed to open serial device." << endl;
+        return -1;
+    }
+    fcntl(this->fd, F_SETFL, 0);
+    
+    if (!isatty(this->fd)) {
+        ::close(this->fd);
+        this->fd = -1;
+        cerr << "Opened device is not a serial device." << endl;
         return -1;
     }
 
@@ -36,33 +47,85 @@ int ArduinoInterface::open() {
     struct termios serialOld;
 
     if (tcgetattr(this->fd, &serial) < 0) {
-        std::cerr << "Failed to acquire serial port configuration." << std::endl;
+        ::close(this->fd);
+        this->fd = -1;
+        cerr << "Failed to acquire serial port configuration." << endl;
         return -2;
     }
 
     serialOld = serial;
 
-    cfsetospeed(&serial, (speed_t)this->baud);
-    cfsetispeed(&serial, (speed_t)this->baud);
+    //serial.c_ispeed = (speed_t)this->baud;
+    //serial.c_ospeed = (speed_t)this->baud;
+    cfsetispeed(&serial, B115200);
+    cfsetospeed(&serial, B115200);
 
-    serial.c_cflag &= ~PARENB;
+    /*serial.c_cflag &= ~PARENB;
     serial.c_cflag &= ~CSTOPB;
     serial.c_cflag &= ~CSIZE;
     serial.c_cflag |= CS8;
 
     serial.c_cflag &= ~CRTSCTS;
-    serial.c_cc[CMIN] = 1;
-    serial.c_cc[VTIME] = 5;
+    //serial.c_cc[CMIN] = 1;
+    serial.c_cc[VMIN] = 1;
+    //serial.c_cc[VTIME] = 5;
+    serial.c_cc[VTIME] = 0;
     serial.c_cflag |= CREAD | CLOCAL;
 
     cfmakeraw(&serial);
 
-    tcflush(this->fd, TCIFLUSH);
+    tcflush(this->fd, TCIFLUSH);*/
+    
+    serial.c_iflag &= ~( IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | IXON );
+    //serial.c_iflag |= IXON;
+    //serial.c_iflag |= IXOFF;
+    //serial.c_iflag = 0;
+    serial.c_oflag = 0;
+    
+    serial.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
+    
+    serial.c_cflag &= ~(CSIZE | PARENB);
+    //serial.c_cflag |= CS8;
+    //serial.c_cflag = CS8 | CREAD | CLOCAL;
+    serial.c_cflag |= CS8;
+    serial.c_cflag |= CREAD;
+    serial.c_cflag |= CLOCAL;
+    
+    serial.c_cc[VMIN] = 1;
+    serial.c_cc[VTIME] = 0;
 
-    if (tcsetattr(this->fd, TCSANOW, &serial) < 0) {
-        std::cerr << "Failed to set serial configuration." << std::endl;
+    int ioctlFlags = TIOCM_RTS | TIOCM_DTR;
+    if (ioctl(this->fd, TIOCMBIS, &ioctlFlags) < 0) {
+        ::close(this->fd);
+        this->fd = -1;
+        cerr << "Failed to enable RTS and DTR." << endl;
         return -3;
     }
+    if (tcsetattr(this->fd, TCSAFLUSH, &serial) < 0) {
+        ::close(this->fd);
+        this->fd = -1;
+        cerr << "Failed to set serial configuration." << endl;
+        return -3;
+    }
+    
+    InterfaceProtocol com = InterfaceProtocol::Invalid;
+    int count;
+    //while ((count = ::read(this->fd, &com, sizeof(InterfaceProtocol))) < 0);
+    do {
+        count = ::read(this->fd, &com, sizeof(InterfaceProtocol));
+        printdf("count: %d\n", count);
+        printdf("incoming byte: %d\n", (uint8_t)com);
+    } while (count < 0);
+    if (com != InterfaceProtocol::Ready) {
+        cerr << "Failed to initialize arduino interface." << endl;
+        this->fd = -1;
+        return -4;
+    }
+    else {
+        ::write(this->fd, &com, sizeof(InterfaceProtocol));
+        printdf("Arduino initialized successfully.\n");
+    }
+    
 
     return 1;
 }
@@ -104,7 +167,13 @@ void ArduinoInterface::setPort(uint8_t port) {
 }
 
 uint8_t ArduinoInterface::getPort() {
-    return 0;
+    InterfaceProtocol com = InterfaceProtocol::GetPort;
+    ::write(this->fd, &com, sizeof(InterfaceProtocol));
+    do {
+        ::read(this->fd, &com, sizeof(InterfaceProtocol));
+    } while (com == InterfaceProtocol::Invalid);
+    
+    return (uint8_t)com;
 }
 
 void ArduinoInterface::close() {

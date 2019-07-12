@@ -6,6 +6,8 @@
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+#include "CBMDriveEmu.h"
 #include "IClockable.h"
 #include "IPeripheral.h"
 
@@ -32,6 +34,15 @@ public:
     virtual void setDirection(uint8_t ddr) override;
     virtual void setPort(uint8_t port) override;
     virtual uint8_t getPort() override;
+    
+private:
+    enum class InterfaceProtocol : uint8_t {
+        Ready = 0,
+        SetDirection = 1,
+        SetPort = 2,
+        GetPort = 3,
+        Invalid = 0xFF
+    };
 };
 
 #endif

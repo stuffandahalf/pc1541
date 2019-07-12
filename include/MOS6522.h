@@ -47,7 +47,7 @@ public:
     
     virtual int cycle() override;
     
-    inline Registers& getRegisters() { return *this->regs; }
+    inline Registers& getRegisters() const { return *this->regs; }
     
     friend std::ostream& operator <<(std::ostream& os, const MOS6522& via);
     
