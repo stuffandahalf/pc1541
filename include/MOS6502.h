@@ -11,7 +11,19 @@
 
 #define addrout(addr) std::cout << std::hex << (addr) << std::dec << std::endl
 
-class MOS6502 : public IClockable, public IInterruptible {
+class MOS6502 : public IClockable {
+private:
+    class Interrupt : public IInterruptible {
+    private:
+        bool status;
+    
+    public:
+        Interrupt() { this->status = false; }
+        virtual inline void interrupt() override { this->status = true; }
+        virtual inline bool pending() override { return this->status; }
+        virtual inline void dismiss() override { this->status = false; }
+    };
+
 private:
     uint8_t IR;     // Instruction register (current opcode)
     uint8_t A;      // Accumulator
@@ -22,6 +34,9 @@ private:
     uint8_t P;      // Processor flags
 
     AddressSpace& addrSpace;
+    
+    Interrupt *nmi;
+    Interrupt *irq;
 
     uint8_t counter;    // remaining cycles for opcode
     size_t cycles;      // total executed cycles since reset
@@ -62,11 +77,13 @@ public:
     };
 
     MOS6502(AddressSpace *addrSpace);
+    ~MOS6502();
 
     void reset();
     void step();
     virtual int cycle() override;
-    virtual int interrupt(uint8_t level) override;
+    inline IInterruptible& getNMI() { return *this->nmi; }
+    inline IInterruptible& getIRQ() { return *this->irq; }
     bool checkFlag(Flags f) const;
     bool setFlag(bool condition, Flags f);
     inline uint8_t getCounter() { return this->counter; }
